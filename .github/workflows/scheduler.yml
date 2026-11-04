@@ -1,0 +1,50 @@
+name: Facebook Page Post Scheduler
+
+on:
+  schedule:
+    # Runs twice daily at 04:00 UTC and 14:00 UTC
+    - cron: '0 4,14 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions web UI
+
+# Required permissions to commit and push changes back to the repository
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish Next Scheduled Post
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history to ensure clean merges/rebases when pushing back
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Execute Facebook Publisher
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python post_to_fb.py
+
+      - name: Commit and push updated posts queue
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add posts.json
+
+          # Verify if changes exist before creating a commit
+          if git diff --staged --quiet; then
+            echo "No changes in posts.json detected. Skipping git commit."
+          else
+            git commit -m "chore(queue): mark post as published [skip ci]"
+            # Pull latest changes to avoid non-fast-forward conflicts if any concurrent writes occurred
+            git pull --rebase
+            git push
+          fi

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "post_001",
+    "message": "🚀 Excited to announce our new open-source automation toolkit! Check out the details in our latest blog post.",
+    "link": "https://example.com/blog/automation-toolkit",
+    "published": false
+  },
+  {
+    "id": "post_002",
+    "message": "💡 DevOps Tip: Always treat infrastructure as code and automate repetitive tasks. Consistency beats manual heroics every time.",
+    "link": "https://example.com/devops-tips",
+    "published": false
+  },
+  {
+    "id": "post_003",
+    "message": "Behind the scenes: How we set up a 100% free serverless social media scheduler using Python and GitHub Actions.",
+    "link": "https://example.com/tutorials/github-actions-scheduler",
+    "published": false
+  }
+]
