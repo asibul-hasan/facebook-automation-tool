@@ -2,8 +2,10 @@ name: Facebook Page Post Scheduler
 
 on:
   schedule:
-    # Runs twice daily at 04:00 UTC and 14:00 UTC
-    - cron: '0 4,14 * * *'
+    # Run 1: Morning Slot at 04:00 UTC (10:00 AM BST / UTC+6) - Agency Marketing
+    - cron: '0 4 * * *'
+    # Run 2: Evening Slot at 14:00 UTC (08:00 PM BST / UTC+6) - Aidly PMS
+    - cron: '0 14 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions web UI
 
 # Required permissions to commit and push changes back to the repository
@@ -44,7 +46,7 @@ jobs:
             echo "No changes in posts.json detected. Skipping git commit."
           else
             git commit -m "chore(queue): mark post as published [skip ci]"
-            # Pull latest changes to avoid non-fast-forward conflicts if any concurrent writes occurred
+            # Pull latest changes to avoid non-fast-forward conflicts
             git pull --rebase
             git push
           fi

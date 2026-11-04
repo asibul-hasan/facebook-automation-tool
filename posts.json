@@ -17,9 +17,9 @@
     "published": false
   },
   {
-    "id": "day1_slot2_aidly_expiry",
-    "category": "Aidly PMS & ERP",
-    "message": "💊 Pharmacy Owners: How much profit are you losing to expired medicines each month?\n\nIn an average pharmacy, 5% to 12% of medicine stock expires on the shelf before it can be sold. That is direct capital lost forever simply due to lack of batch visibility.\n\nMeet Aidly PMS — the modern Pharmacy Management System built to stop expired stock losses:\n🛡️ Automated 30/60/90-day expiry date alerts\n📦 Intelligent First-Expiry-First-Out (FEFO) dispensing\n📊 Real-time batch-level inventory tracking\n📉 Return-to-vendor automation before items expire\n\nProtect your margins and run your pharmacy with complete peace of mind. Schedule your free Aidly PMS live demo today!\n\n#AidlyPMS #PharmacyManagement #PharmacySoftware #HealthTech #ERP #BatchTracking #PharmaRetail #InfoAidTech",
+    "id": "day1_slot2_aidly_pms_expiry",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "💊 Pharmacy Owners: How much revenue are you losing to expired medicines every month?\n\nIn an average retail pharmacy, 5% to 12% of total medicine inventory expires on the shelves before being sold. That is direct capital lost forever simply due to lack of batch-level visibility.\n\nAidly PMS was designed from the ground up to protect pharmacy profit margins:\n🛡️ Automated 30/60/90-day expiry date alerts on your dashboard\n📦 First-Expiry-First-Out (FEFO) dispensing order\n📊 Instant batch-wise stock visibility across every shelf\n📉 One-click return-to-vendor credit notes before medicines expire\n\nStop writing off dead stock. Run your pharmacy with complete peace of mind using Aidly PMS!\n\n#AidlyPMS #PharmacyManagement #PharmacySoftware #HealthTech #MedicineStock #PharmaRetail #PharmacyPOS #InfoAidTech",
     "link": "https://infoaidtech.net/aidly-pms",
     "image_url": "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=1200&h=630&fit=crop&q=80",
     "published": false
@@ -33,9 +33,9 @@
     "published": false
   },
   {
-    "id": "day2_slot2_aidly_pos",
-    "category": "Aidly PMS & ERP",
-    "message": "⏳ Long queues at your pharmacy counter during rush hour? Never lose a customer to slow checkout.\n\nManual billing and searching through unorganized stock causes delays, frustrated customers, and costly cashier mistakes.\n\nAidly PMS transforms your sales counter with lightning-fast POS:\n⚡ 3-second barcode billing & quick search by generic/trade name\n🧾 Automatic thermal receipt printing & instant SMS invoices\n💳 Multi-mode payment acceptance (Cash, Cards, Mobile Banking)\n🔄 Seamless real-time stock balance synchronization across counters\n\nSpeed up sales, prevent cashier errors, and delight your patients with Aidly PMS.\n\n#AidlyPMS #PharmacyPOS #PointOfSale #RetailSoftware #QuickBilling #PharmaBusiness #InfoAidTech",
+    "id": "day2_slot2_aidly_pms_pos",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "⏳ Long queues at your pharmacy counter during rush hour? Never lose a customer to slow billing.\n\nWhen a patient needs urgent medicine, manual product lookups and slow invoice printing cause frustration and costly cashier mistakes.\n\nAidly PMS transforms your sales counter with lightning-fast POS:\n⚡ 3-second barcode billing & instant search by brand or generic name\n🧾 Automatic thermal receipt printing & instant digital SMS invoices\n💳 Multi-channel payment support (Cash, Cards, and Mobile Banking)\n🔄 Real-time multi-counter stock synchronization without stock collisions\n\nSpeed up customer checkout, eliminate billing errors, and elevate customer trust with Aidly PMS.\n\n#AidlyPMS #PharmacyPOS #PharmacyBilling #POSSoftware #PharmaRetail #PharmacyCounter #HealthcareTech #InfoAidTech",
     "link": "https://infoaidtech.net/aidly-pms",
     "image_url": "https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=1200&h=630&fit=crop&q=80",
     "published": false
@@ -49,9 +49,9 @@
     "published": false
   },
   {
-    "id": "day3_slot2_aidly_accounting",
-    "category": "Aidly PMS & ERP",
-    "message": "📊 End-of-day cash reconciliation giving you headaches?\n\nManaging pharmacy sales in one software and financial accounting in messy paper books or spreadsheets leaves dangerous blind spots in your cash flow.\n\nAidly PMS features an integrated, dual-ledger accounting system built specifically for healthcare & retail:\n💰 Automated daily cash drawer & day-book reconciliation\n📑 Automatic journal entry posting upon sale or purchase\n📈 Instant Balance Sheet, Profit & Loss, and Trial Balance reports\n⚖️ Bank account reconciliations & petty cash tracking\n\nKeep every cent accounted for with zero double entry. Experience seamless accounting with Aidly PMS!\n\n#AidlyPMS #PharmaAccounting #DualLedger #CashFlow #FinancialManagement #ERPAccounting #InfoAidTech",
+    "id": "day3_slot2_aidly_pms_cash_drawer",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "💰 End-of-day cash drawer discrepancy? Where did the missing money go?\n\nIn high-volume retail pharmacies, tracking cash across cashier shifts without a strict ledger leads to unexplainable register shortages and internal friction.\n\nAidly PMS features an automated Cash Management & Day Book system:\n💵 Shift-based cash drawer opening & closing balance tracking\n📥 Strict logging of petty cash expenses with voucher upload\n⚖️ Instant automated reconciliation: System Total vs Cash in Drawer\n🔒 Role-based cashier permissions preventing unauthorized drawer edits\n\nKeep every single cent accounted for across all shifts. Take control of your pharmacy cash flow with Aidly PMS!\n\n#AidlyPMS #CashManagement #PharmacyFinance #DayBook #CashDrawer #PharmacyAudit #PharmaRetail #InfoAidTech",
     "link": "https://infoaidtech.net/aidly-pms",
     "image_url": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=630&fit=crop&q=80",
     "published": false
@@ -65,11 +65,11 @@
     "published": false
   },
   {
-    "id": "day4_slot2_aidly_erp",
-    "category": "Aidly PMS & ERP",
-    "message": "🏢 Still running your expanding SME or wholesale distribution on disconnected Excel sheets?\n\nAs your business grows, scattered spreadsheets lead to duplicate inventory entries, delayed client deliveries, and zero operational visibility.\n\nAidly ERP is the all-in-one modular cloud ERP platform for modern SMEs:\n👥 Human Resource Management (HRM, payroll, attendance, and leave management)\n📦 Intelligent Procurement & automated supplier purchase orders\n🚚 Warehouse stock transfers & multi-location inventory\n📈 Centralized sales analytics with granular role-based access control (RBAC)\n\nConsolidate your operations into one powerful dashboard. Upgrade to Aidly ERP today!\n\n#AidlyERP #SMEsoftware #EnterpriseResourcePlanning #BusinessAutomation #CloudERP #SupplyChain #InfoAidTech",
-    "link": "https://infoaidtech.net/aidly-erp",
-    "image_url": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=630&fit=crop&q=80",
+    "id": "day4_slot2_aidly_pms_doctors",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "👨‍⚕️ Partnering with local clinic doctors and healthcare practitioners?\n\nTracking prescription referrals and calculating doctor commissions using manual registers is error-prone, messy, and wastes hours at the end of the month.\n\nAidly PMS includes a dedicated Prescribing Doctor Registry:\n📋 Comprehensive doctor directory with specialization and contact profiles\n🏷️ 1-click prescription linking at the POS billing counter\n📊 Automated commission calculations by fixed fee or percentage per item\n📑 Instant monthly doctor referral performance statements\n\nBuild transparent, trusted relationships with healthcare practitioners using Aidly PMS.\n\n#AidlyPMS #DoctorReferrals #HealthcareManagement #PharmaPartnerships #DoctorCommission #PharmacySystem #InfoAidTech",
+    "link": "https://infoaidtech.net/aidly-pms",
+    "image_url": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=630&fit=crop&q=80",
     "published": false
   },
   {
@@ -81,9 +81,9 @@
     "published": false
   },
   {
-    "id": "day5_slot2_aidly_excel_import",
-    "category": "Aidly PMS & ERP",
-    "message": "📥 Tired of manually entering 5,000+ medicine products one by one?\n\nTransitioning to a new pharmacy software shouldn't take weeks of tedious data entry. With Aidly PMS, migrating your entire inventory takes minutes.\n\nSmart Data Features in Aidly PMS:\n📁 1-Click Excel/CSV bulk import with intelligent column mapping\n📑 Pre-configured master generic drug database\n📊 Automated minimum stock threshold & re-order level calculation\n📝 Supplier-wise automated requisition slip generation\n\nSwitch to Aidly PMS with zero downtime and zero data loss. Contact us for a migration consultation!\n\n#AidlyPMS #PharmaData #DataImport #InventoryControl #PharmacyTech #PharmacyWorkflow #InfoAidTech",
+    "id": "day5_slot2_aidly_pms_supplier_requisitions",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "📦 Out of critical medicines because a supplier delivery was delayed?\n\nRunning out of high-demand medicines costs you customers who will simply walk over to the pharmacy next door.\n\nAidly PMS automates your entire Pharmacy Procurement cycle:\n🚨 Smart low-stock threshold notifications before items run out\n📝 Automated supplier requisition slip generation based on sales velocity\n🤝 Medical representative (MR) order tracking and purchase histories\n📥 1-Click purchase order to stock ledger updating with batch and expiry entry\n\nNever face an empty shelf on essential medicines. Automate your orders with Aidly PMS!\n\n#AidlyPMS #PharmaProcurement #InventoryManagement #PharmaSuppliers #MedicalSupplies #PharmacyTech #InfoAidTech",
     "link": "https://infoaidtech.net/aidly-pms",
     "image_url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&h=630&fit=crop&q=80",
     "published": false
@@ -97,9 +97,9 @@
     "published": false
   },
   {
-    "id": "day6_slot2_aidly_due_credit",
-    "category": "Aidly PMS & ERP",
-    "message": "🧾 Never lose track of customer due slips and credit balances again!\n\nAllowing trusted customers and institutions to buy on credit is standard practice for pharmacies, but tracking debts on paper slips leads to forgotten balances, disputes, and unrecoverable bad debts.\n\nAidly PMS Due & Credit Management Module:\n👤 Dedicated customer credit ledger with strict credit limits\n📱 Automated SMS due reminders with remaining balance\n💵 Instant partial or full debt settlement with digital receipting\n📊 Aging analysis reports: see dues categorized by 30, 60, and 90+ days\n\nCollect your hard-earned money faster and maintain clear customer relationships with Aidly PMS.\n\n#AidlyPMS #CustomerCredit #DueManagement #PharmacyFinance #PharmaERP #CashManagement #InfoAidTech",
+    "id": "day6_slot2_aidly_pms_due_credit",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "🧾 Never lose track of customer due slips and credit balances again!\n\nAllowing regular customers and local clinics to purchase medicines on credit is essential for loyalty, but recording debts in paper khata books leads to forgotten balances and lost revenue.\n\nAidly PMS Customer Due & Credit Management Module:\n👤 Dedicated customer credit ledger with strict customizable credit limits\n📱 Automated SMS due alerts with outstanding balance and payment link\n💵 Instant partial or full debt settlement with official digital receipts\n📊 Aging analysis reports: see dues categorized by 30, 60, and 90+ days\n\nCollect your hard-earned pharmacy revenue faster and maintain transparent customer relationships with Aidly PMS.\n\n#AidlyPMS #PharmacyCredit #DueCollection #PharmaFinance #PharmacyLedger #CustomerDue #InfoAidTech",
     "link": "https://infoaidtech.net/aidly-pms",
     "image_url": "https://images.unsplash.com/photo-1450133064473-71024230f91b?w=1200&h=630&fit=crop&q=80",
     "published": false
@@ -113,11 +113,11 @@
     "published": false
   },
   {
-    "id": "day7_slot2_aidly_live_demo",
-    "category": "Aidly PMS & ERP",
-    "message": "💡 Transform your pharmacy or SME into a modern, data-driven operation today!\n\nFrom solo retail pharmacies to multi-branch hospital dispensary chains and SME enterprises, Aidly PMS & ERP provides the speed, reliability, and precision your business deserves.\n\nWhy pharmacy managers switch to Aidly:\n🌟 Zero downtime, lightning-fast POS checkout\n🌟 Complete batch, expiry, and due ledger security\n🌟 Dual-entry financial accounting integrated out of the box\n🌟 Dedicated onboarding, migration support, and training for your staff\n\nSee the system live in action. Request your personalized free demo today!\n\n#AidlyPMS #AidlyERP #PharmacyInnovation #EnterpriseSoftware #PharmaRetail #HealthcareSoftware #InfoAidTech",
+    "id": "day7_slot2_aidly_pms_reports_analytics",
+    "category": "Aidly PMS (Pharmacy Management)",
+    "message": "📊 Do you know your pharmacy's exact net profit and stock valuation right now?\n\nMost pharmacy owners only discover their financial health at tax time. Real growth requires daily visibility into high-margin medicines, fast-moving items, and shrinkage.\n\nAidly PMS Real-Time Pharmacy Analytics Suite:\n📈 Instant Profit & Loss statements and gross margin breakdown\n📦 Real-time total stock valuation at purchase vs retail value\n🏆 Top-selling medicines and dead stock velocity reports\n📑 Government-compliant VAT and sales tax reports ready for export\n\nMake data-backed decisions that grow your pharmacy. Experience the complete Aidly PMS platform with a free live demo!\n\n#AidlyPMS #PharmacyAnalytics #PharmaProfit #StockValuation #PharmacyReporting #HealthTechInnovation #InfoAidTech",
     "link": "https://infoaidtech.net/aidly-demo",
-    "image_url": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=630&fit=crop&q=80",
+    "image_url": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&h=630&fit=crop&q=80",
     "published": false
   }
 ]
