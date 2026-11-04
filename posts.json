@@ -3,7 +3,9 @@
     "id": "post_001",
     "message": "🚀 Excited to announce our new open-source automation toolkit! Check out the details in our latest blog post.",
     "link": "https://example.com/blog/automation-toolkit",
-    "published": false
+    "published": true,
+    "facebook_post_id": "115692601520788_1063869546702728",
+    "published_at": "2026-11-04T13:26:13.730597+00:00"
   },
   {
     "id": "post_002",
