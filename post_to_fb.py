@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
 """
-Facebook Page Automated Posting Script
---------------------------------------
-Publishes queued content from a local JSON file directly to the
-Facebook Page Main Timeline Feed (Wall) via Meta Graph API v21.0.
+Facebook Page Automated Posting Script (Professional Media Edition)
+--------------------------------------------------------------------
+Publishes high-converting, spicy posts directly to the Facebook Page Timeline
+Feed with full-width, eye-catching visual banners and Unicode bold formatting.
 
-Posting directly to POST /{page_id}/feed ensures:
-1. The post appears directly on the Page's public Timeline / Wall.
-2. The post is pushed to followers' home feeds.
-3. Every public visitor to the Page sees it front-and-center.
-4. Interactive rich link preview cards with banners are automatically rendered.
+Features:
+1. Two-Step Attached Media Upload:
+   - Uploads high-res image to POST /{page_id}/photos as published=false
+   - Attaches media to POST /{page_id}/feed with attached_media
+   - Result: 100% full-width, edge-to-edge timeline photo post on the public wall!
+2. Facebook Markdown Engine:
+   - Automatically converts **bold text** into genuine Unicode Sans-Serif Bold
+     characters so headlines and power words appear BOLD directly in the FB feed!
+3. Fallback to standard feed post if no image URL is provided.
 
 Uses strictly Python standard libraries (no third-party dependencies):
 - urllib.request / urllib.parse / urllib.error
-- json, os, sys, logging, datetime
+- json, re, os, sys, logging, datetime
 """
 
 import json
 import logging
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -49,6 +54,30 @@ def get_required_env(var_name: str) -> str:
         logger.error("Missing required environment variable: '%s'", var_name)
         sys.exit(1)
     return value.strip()
+
+
+# ---------------------------------------------------------------------------
+# Facebook Typography Engine (Unicode Bold Renderer)
+# ---------------------------------------------------------------------------
+def _to_unicode_bold(text: str) -> str:
+    """Converts standard Latin alphanumeric text into Unicode Sans-Serif Bold."""
+    chars = []
+    for char in text:
+        code = ord(char)
+        if 65 <= code <= 90:  # A-Z
+            chars.append(chr(0x1D5D4 + (code - 65)))
+        elif 97 <= code <= 122:  # a-z
+            chars.append(chr(0x1D5EE + (code - 97)))
+        elif 48 <= code <= 57:  # 0-9
+            chars.append(chr(0x1D7EC + (code - 48)))
+        else:
+            chars.append(char)
+    return "".join(chars)
+
+
+def render_facebook_markdown(text: str) -> str:
+    """Converts **bold markers** into real bold typography for Facebook."""
+    return re.sub(r"\*\*(.+?)\*\*", lambda m: _to_unicode_bold(m.group(1)), text)
 
 
 # ---------------------------------------------------------------------------
@@ -92,73 +121,107 @@ def save_posts(filepath: str, posts: list[dict]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Meta Graph API Integration (Direct Timeline Feed Publishing)
+# Meta Graph API Integration (Two-Step Full Banner Publishing)
 # ---------------------------------------------------------------------------
-def publish_to_timeline_feed(
+def publish_timeline_photo_post(
+    page_id: str,
+    page_token: str,
+    message: str,
+    image_url: str,
+) -> dict:
+    """
+    Publishes a full-width high-res banner directly onto the Page Timeline Feed.
+    Step 1: Upload image as unpublished media (POST /{page_id}/photos)
+    Step 2: Create public timeline story with attached_media (POST /{page_id}/feed)
+    """
+    logger.info("Step 1: Uploading high-res banner image to Meta servers...")
+    photo_endpoint = f"{GRAPH_API_BASE}/{page_id}/photos"
+    photo_payload = urllib.parse.urlencode({
+        "url": image_url.strip(),
+        "published": "false",
+        "access_token": page_token,
+    }).encode("utf-8")
+
+    req1 = urllib.request.Request(
+        url=photo_endpoint,
+        data=photo_payload,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "AutomatedFBScheduler/4.0",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req1, timeout=45) as resp1:
+            photo_result = json.loads(resp1.read().decode("utf-8"))
+            media_fbid = photo_result.get("id")
+            logger.info("Banner uploaded successfully (Media FBID: %s).", media_fbid)
+    except urllib.error.HTTPError as http_err:
+        err_body = http_err.read().decode("utf-8", errors="replace")
+        logger.error("Failed to upload banner photo (HTTP %d): %s", http_err.code, err_body)
+        sys.exit(1)
+
+    # Step 2: Publish public timeline feed post with attached banner
+    logger.info("Step 2: Creating full-width timeline post on Page wall...")
+    feed_endpoint = f"{GRAPH_API_BASE}/{page_id}/feed"
+    feed_payload = urllib.parse.urlencode({
+        "message": message,
+        "attached_media": json.dumps([{"media_fbid": media_fbid}]),
+        "access_token": page_token,
+        "published": "true",
+    }).encode("utf-8")
+
+    req2 = urllib.request.Request(
+        url=feed_endpoint,
+        data=feed_payload,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "AutomatedFBScheduler/4.0",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req2, timeout=45) as resp2:
+            feed_result = json.loads(resp2.read().decode("utf-8"))
+            logger.info("Facebook Timeline Post Published: %s", feed_result)
+            return feed_result
+    except urllib.error.HTTPError as http_err:
+        err_body = http_err.read().decode("utf-8", errors="replace")
+        logger.error("Failed to publish timeline feed post (HTTP %d): %s", http_err.code, err_body)
+        sys.exit(1)
+
+
+def publish_timeline_feed_post(
     page_id: str,
     page_token: str,
     message: str,
     link: str | None = None,
 ) -> dict:
-    """
-    Publish content directly to the Facebook Page Timeline Feed (Wall).
-    Endpoint: POST https://graph.facebook.com/v21.0/{page_id}/feed
-    """
+    """Standard feed post fallback when no banner image is provided."""
     url = f"{GRAPH_API_BASE}/{page_id}/feed"
-
-    form_payload = {
+    payload = {
         "message": message,
         "access_token": page_token,
         "published": "true",
     }
     if link and link.strip():
-        form_payload["link"] = link.strip()
+        payload["link"] = link.strip()
 
-    encoded_data = urllib.parse.urlencode(form_payload).encode("utf-8")
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "AutomatedFBScheduler/3.0",
-    }
-
-    logger.info("Publishing directly to Page Timeline Feed (public wall)...")
-
-    request = urllib.request.Request(
+    encoded_data = urllib.parse.urlencode(payload).encode("utf-8")
+    req = urllib.request.Request(
         url=url,
         data=encoded_data,
-        headers=headers,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "AutomatedFBScheduler/4.0",
+        },
         method="POST",
     )
 
-    try:
-        with urllib.request.urlopen(request, timeout=45) as response:
-            status_code = response.getcode()
-            raw_body = response.read().decode("utf-8")
-            response_json = json.loads(raw_body)
-            logger.info("Facebook API responded with HTTP %d: %s", status_code, response_json)
-            return response_json
-    except urllib.error.HTTPError as http_err:
-        error_detail = http_err.read().decode("utf-8", errors="replace")
-        try:
-            parsed_error = json.loads(error_detail)
-            error_msg = parsed_error.get("error", {}).get("message", error_detail)
-            error_code = parsed_error.get("error", {}).get("code", "unknown")
-            error_subcode = parsed_error.get("error", {}).get("error_subcode", "none")
-            logger.error(
-                "Facebook Graph API Error (HTTP %d, Code: %s, Subcode: %s): %s",
-                http_err.code,
-                error_code,
-                error_subcode,
-                error_msg,
-            )
-        except json.JSONDecodeError:
-            logger.error("Facebook API Error HTTP %d: %s", http_err.code, error_detail)
-        sys.exit(1)
-    except urllib.error.URLError as url_err:
-        logger.error("Network connection error reaching Facebook API: %s", url_err.reason)
-        sys.exit(1)
-    except TimeoutError:
-        logger.error("Request to Facebook Graph API timed out after 45 seconds.")
-        sys.exit(1)
+    with urllib.request.urlopen(req, timeout=45) as resp:
+        return json.loads(resp.read().decode("utf-8"))
 
 
 # ---------------------------------------------------------------------------
@@ -187,26 +250,38 @@ def main():
 
     post_id = target_post.get("id", f"index_{target_index}")
     category = target_post.get("category", "General")
-    message = target_post.get("message")
+    raw_message = target_post.get("message", "")
     link = target_post.get("link")
+    image_url = target_post.get("image_url")
 
-    if not message:
+    if not raw_message.strip():
         logger.error("Post (ID: %s) has no 'message' field or message is empty.", post_id)
         sys.exit(1)
 
+    # Render genuine Unicode Bold characters from markdown **bold**
+    formatted_message = render_facebook_markdown(raw_message.strip())
+
     logger.info(
-        "Publishing unpublished post [ID: %s | Category: %s] directly to Page Timeline Feed %s...",
+        "Publishing [ID: %s | Category: %s] as Full-Width Banner Timeline Post to Page %s...",
         post_id,
         category,
         page_id,
     )
 
-    api_result = publish_to_timeline_feed(
-        page_id=page_id,
-        page_token=page_token,
-        message=message,
-        link=link,
-    )
+    if image_url and image_url.strip():
+        api_result = publish_timeline_photo_post(
+            page_id=page_id,
+            page_token=page_token,
+            message=formatted_message,
+            image_url=image_url.strip(),
+        )
+    else:
+        api_result = publish_timeline_feed_post(
+            page_id=page_id,
+            page_token=page_token,
+            message=formatted_message,
+            link=link,
+        )
 
     published_id = api_result.get("id", "unknown_id")
     target_post["published"] = True
@@ -216,7 +291,7 @@ def main():
 
     save_posts(posts_filepath, posts)
     logger.info(
-        "Successfully published post (ID: %s) as Facebook Timeline Post ID: %s",
+        "Successfully published post (ID: %s) as Full-Width Timeline Post: %s",
         post_id,
         published_id,
     )
