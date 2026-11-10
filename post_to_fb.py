@@ -2,31 +2,27 @@
 """
 Facebook Page Automated Posting Script
 --------------------------------------
-Publishes queued content from a local JSON file to a Meta Facebook Page
-using the Meta Graph API v21.0.
+Publishes queued content from a local JSON file directly to the
+Facebook Page Main Timeline Feed (Wall) via Meta Graph API v21.0.
 
-Supports:
-1. Photo posts with high-res banners via 'image_url' (POST /{page_id}/photos)
-2. Photo posts with local image files via 'image_path' (multipart upload)
-3. Standard feed posts with links (POST /{page_id}/feed)
-
-Explicitly enforces public publishing ('published': 'true').
+Posting directly to POST /{page_id}/feed ensures:
+1. The post appears directly on the Page's public Timeline / Wall.
+2. The post is pushed to followers' home feeds.
+3. Every public visitor to the Page sees it front-and-center.
+4. Interactive rich link preview cards with banners are automatically rendered.
 
 Uses strictly Python standard libraries (no third-party dependencies):
 - urllib.request / urllib.parse / urllib.error
-- mimetypes, uuid
 - json, os, sys, logging, datetime
 """
 
 import json
 import logging
-import mimetypes
 import os
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-import uuid
 from datetime import datetime, timezone
 
 # ---------------------------------------------------------------------------
@@ -96,100 +92,35 @@ def save_posts(filepath: str, posts: list[dict]) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Multipart Form-Data Builder (Standard Library)
+# Meta Graph API Integration (Direct Timeline Feed Publishing)
 # ---------------------------------------------------------------------------
-def _build_multipart_payload(fields: dict, file_field: str, file_path: str) -> tuple[bytes, str]:
-    """Builds multipart/form-data payload without external packages."""
-    boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
-    body = bytearray()
-
-    for key, value in fields.items():
-        body.extend(f"--{boundary}\r\n".encode("utf-8"))
-        body.extend(f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode("utf-8"))
-        body.extend(f"{value}\r\n".encode("utf-8"))
-
-    mime_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
-    filename = os.path.basename(file_path)
-
-    body.extend(f"--{boundary}\r\n".encode("utf-8"))
-    body.extend(f'Content-Disposition: form-data; name="{file_field}"; filename="{filename}"\r\n'.encode("utf-8"))
-    body.extend(f"Content-Type: {mime_type}\r\n\r\n".encode("utf-8"))
-
-    with open(file_path, "rb") as f:
-        body.extend(f.read())
-    body.extend(b"\r\n")
-    body.extend(f"--{boundary}--\r\n".encode("utf-8"))
-
-    content_type = f"multipart/form-data; boundary={boundary}"
-    return bytes(body), content_type
-
-
-# ---------------------------------------------------------------------------
-# Meta Graph API Integration
-# ---------------------------------------------------------------------------
-def publish_to_facebook(
+def publish_to_timeline_feed(
     page_id: str,
     page_token: str,
     message: str,
     link: str | None = None,
-    image_url: str | None = None,
-    image_path: str | None = None,
 ) -> dict:
     """
-    Publish content to the Facebook Page feed or photos endpoint.
-    If image_url or image_path is provided, publishes a rich photo post.
-    Otherwise, publishes a standard feed post.
-    Explicitly enforces 'published': 'true'.
+    Publish content directly to the Facebook Page Timeline Feed (Wall).
+    Endpoint: POST https://graph.facebook.com/v21.0/{page_id}/feed
     """
-    caption = message
-    if link and link.strip() and (image_url or image_path):
-        caption = f"{message}\n\n👉 Learn more / Get started: {link.strip()}"
+    url = f"{GRAPH_API_BASE}/{page_id}/feed"
 
-    if image_path and os.path.exists(image_path):
-        url = f"{GRAPH_API_BASE}/{page_id}/photos"
-        fields = {
-            "caption": caption,
-            "access_token": page_token,
-            "published": "true",
-        }
-        encoded_data, content_type = _build_multipart_payload(fields, "source", image_path)
-        headers = {
-            "Content-Type": content_type,
-            "User-Agent": "AutomatedFBScheduler/2.1",
-        }
-        logger.info("Uploading local image '%s' to Facebook Page (public)...", image_path)
+    form_payload = {
+        "message": message,
+        "access_token": page_token,
+        "published": "true",
+    }
+    if link and link.strip():
+        form_payload["link"] = link.strip()
 
-    elif image_url and image_url.strip():
-        url = f"{GRAPH_API_BASE}/{page_id}/photos"
-        form_payload = {
-            "url": image_url.strip(),
-            "caption": caption,
-            "access_token": page_token,
-            "published": "true",
-        }
-        encoded_data = urllib.parse.urlencode(form_payload).encode("utf-8")
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "AutomatedFBScheduler/2.1",
-        }
-        logger.info("Publishing photo post with banner URL to Facebook Page (public)...")
+    encoded_data = urllib.parse.urlencode(form_payload).encode("utf-8")
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "AutomatedFBScheduler/3.0",
+    }
 
-    else:
-        url = f"{GRAPH_API_BASE}/{page_id}/feed"
-        form_payload = {
-            "message": message,
-            "access_token": page_token,
-            "published": "true",
-        }
-        if link and link.strip():
-            form_payload["link"] = link.strip()
-
-        encoded_data = urllib.parse.urlencode(form_payload).encode("utf-8")
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "AutomatedFBScheduler/2.1",
-        }
-        logger.info("Publishing standard feed post to Facebook Page (public)...")
+    logger.info("Publishing directly to Page Timeline Feed (public wall)...")
 
     request = urllib.request.Request(
         url=url,
@@ -258,27 +189,23 @@ def main():
     category = target_post.get("category", "General")
     message = target_post.get("message")
     link = target_post.get("link")
-    image_url = target_post.get("image_url")
-    image_path = target_post.get("image_path")
 
     if not message:
         logger.error("Post (ID: %s) has no 'message' field or message is empty.", post_id)
         sys.exit(1)
 
     logger.info(
-        "Publishing unpublished post [ID: %s | Category: %s] to Page %s...",
+        "Publishing unpublished post [ID: %s | Category: %s] directly to Page Timeline Feed %s...",
         post_id,
         category,
         page_id,
     )
 
-    api_result = publish_to_facebook(
+    api_result = publish_to_timeline_feed(
         page_id=page_id,
         page_token=page_token,
         message=message,
         link=link,
-        image_url=image_url,
-        image_path=image_path,
     )
 
     published_id = api_result.get("id", "unknown_id")
@@ -289,7 +216,7 @@ def main():
 
     save_posts(posts_filepath, posts)
     logger.info(
-        "Successfully published post (ID: %s) as Facebook post ID: %s",
+        "Successfully published post (ID: %s) as Facebook Timeline Post ID: %s",
         post_id,
         published_id,
     )
