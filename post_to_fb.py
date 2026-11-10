@@ -10,6 +10,8 @@ Supports:
 2. Photo posts with local image files via 'image_path' (multipart upload)
 3. Standard feed posts with links (POST /{page_id}/feed)
 
+Explicitly enforces public publishing ('published': 'true').
+
 Uses strictly Python standard libraries (no third-party dependencies):
 - urllib.request / urllib.parse / urllib.error
 - mimetypes, uuid
@@ -137,6 +139,7 @@ def publish_to_facebook(
     Publish content to the Facebook Page feed or photos endpoint.
     If image_url or image_path is provided, publishes a rich photo post.
     Otherwise, publishes a standard feed post.
+    Explicitly enforces 'published': 'true'.
     """
     caption = message
     if link and link.strip() and (image_url or image_path):
@@ -147,13 +150,14 @@ def publish_to_facebook(
         fields = {
             "caption": caption,
             "access_token": page_token,
+            "published": "true",
         }
         encoded_data, content_type = _build_multipart_payload(fields, "source", image_path)
         headers = {
             "Content-Type": content_type,
-            "User-Agent": "AutomatedFBScheduler/2.0",
+            "User-Agent": "AutomatedFBScheduler/2.1",
         }
-        logger.info("Uploading local image '%s' to Facebook Page...", image_path)
+        logger.info("Uploading local image '%s' to Facebook Page (public)...", image_path)
 
     elif image_url and image_url.strip():
         url = f"{GRAPH_API_BASE}/{page_id}/photos"
@@ -161,19 +165,21 @@ def publish_to_facebook(
             "url": image_url.strip(),
             "caption": caption,
             "access_token": page_token,
+            "published": "true",
         }
         encoded_data = urllib.parse.urlencode(form_payload).encode("utf-8")
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "AutomatedFBScheduler/2.0",
+            "User-Agent": "AutomatedFBScheduler/2.1",
         }
-        logger.info("Publishing photo post with banner URL to Facebook Page...")
+        logger.info("Publishing photo post with banner URL to Facebook Page (public)...")
 
     else:
         url = f"{GRAPH_API_BASE}/{page_id}/feed"
         form_payload = {
             "message": message,
             "access_token": page_token,
+            "published": "true",
         }
         if link and link.strip():
             form_payload["link"] = link.strip()
@@ -181,9 +187,9 @@ def publish_to_facebook(
         encoded_data = urllib.parse.urlencode(form_payload).encode("utf-8")
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "AutomatedFBScheduler/2.0",
+            "User-Agent": "AutomatedFBScheduler/2.1",
         }
-        logger.info("Publishing standard feed post to Facebook Page...")
+        logger.info("Publishing standard feed post to Facebook Page (public)...")
 
     request = urllib.request.Request(
         url=url,
