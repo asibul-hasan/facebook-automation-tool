@@ -131,29 +131,74 @@ def publish_timeline_photo_post(
 ) -> dict:
     """
     Publishes a full-width high-res banner directly onto the Page Timeline Feed.
+    Supports both local image files (uploaded via multipart/form-data) and remote HTTP URLs.
     Step 1: Upload image as unpublished media (POST /{page_id}/photos)
     Step 2: Create public timeline story with attached_media (POST /{page_id}/feed)
     """
-    logger.info("Step 1: Uploading high-res banner image to Meta servers...")
     photo_endpoint = f"{GRAPH_API_BASE}/{page_id}/photos"
-    photo_payload = urllib.parse.urlencode({
-        "url": image_url.strip(),
-        "published": "false",
-        "access_token": page_token,
-    }).encode("utf-8")
+    
+    # Check if image_url points to a local file
+    resolved_path = None
+    if not (image_url.startswith("http://") or image_url.startswith("https://")):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        cand1 = os.path.join(base_dir, image_url)
+        cand2 = os.path.abspath(image_url)
+        if os.path.exists(cand1):
+            resolved_path = cand1
+        elif os.path.exists(cand2):
+            resolved_path = cand2
+        else:
+            logger.warning("Local banner file '%s' not found, falling back to URL mode.", image_url)
 
-    req1 = urllib.request.Request(
-        url=photo_endpoint,
-        data=photo_payload,
-        headers={
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "AutomatedFBScheduler/4.0",
-        },
-        method="POST",
-    )
+    if resolved_path and os.path.isfile(resolved_path):
+        logger.info("Step 1: Uploading local high-res banner '%s' via multipart to Meta...", resolved_path)
+        boundary = "----WebKitFormBoundary" + os.urandom(16).hex()
+        body = bytearray()
+        
+        for name, val in [("access_token", page_token), ("published", "false")]:
+            body.extend(f"--{boundary}\r\n".encode())
+            body.extend(f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode())
+            body.extend(f"{val}\r\n".encode())
+            
+        filename = os.path.basename(resolved_path)
+        mime_type = "image/jpeg" if filename.lower().endswith((".jpg", ".jpeg")) else "image/png"
+        body.extend(f"--{boundary}\r\n".encode())
+        body.extend(f'Content-Disposition: form-data; name="source"; filename="{filename}"\r\n'.encode())
+        body.extend(f"Content-Type: {mime_type}\r\n\r\n".encode())
+        with open(resolved_path, "rb") as f:
+            body.extend(f.read())
+        body.extend(b"\r\n")
+        body.extend(f"--{boundary}--\r\n".encode())
+        
+        req1 = urllib.request.Request(
+            url=photo_endpoint,
+            data=body,
+            headers={
+                "Content-Type": f"multipart/form-data; boundary={boundary}",
+                "User-Agent": "AutomatedFBScheduler/4.0",
+            },
+            method="POST",
+        )
+    else:
+        logger.info("Step 1: Uploading remote banner URL to Meta servers: %s", image_url)
+        photo_payload = urllib.parse.urlencode({
+            "url": image_url.strip(),
+            "published": "false",
+            "access_token": page_token,
+        }).encode("utf-8")
+
+        req1 = urllib.request.Request(
+            url=photo_endpoint,
+            data=photo_payload,
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "AutomatedFBScheduler/4.0",
+            },
+            method="POST",
+        )
 
     try:
-        with urllib.request.urlopen(req1, timeout=45) as resp1:
+        with urllib.request.urlopen(req1, timeout=60) as resp1:
             photo_result = json.loads(resp1.read().decode("utf-8"))
             media_fbid = photo_result.get("id")
             logger.info("Banner uploaded successfully (Media FBID: %s).", media_fbid)
