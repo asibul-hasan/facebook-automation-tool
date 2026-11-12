@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080, height=1080">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Hind+Siliguri:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif; }
+    .en { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="w-[1080px] h-[1080px] bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0b1329] text-white p-8 flex flex-col justify-between overflow-hidden relative select-none">
+  
+  <!-- Glowing ambient lights -->
+  <div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute top-1/3 -right-24 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Top Header / Brand Row -->
+  <div class="flex items-center justify-between z-10 px-2 pt-1">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-cyan-500/30 en">
+        IA
+      </div>
+      <div>
+        <h2 class="text-xl font-black text-white tracking-tight leading-none en">INFO AIDTECH</h2>
+        <p class="text-xs text-cyan-400 font-bold tracking-wider uppercase en mt-0.5">Enterprise Cloud Software</p>
+      </div>
+    </div>
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-900/60 border border-blue-400/40 text-cyan-300 text-xs font-bold shadow-sm">
+      <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+      Aidly PMS · All-In-One Cloud Solution
+    </div>
+  </div>
+
+  <!-- Hero Headlines Section -->
+  <div class="text-center z-10 mt-1 px-4">
+    <h3 class="text-[30px] font-bold text-slate-300 leading-tight">
+      আধুনিক ফার্মেসির জন্য তৈরি সম্পূর্ণ ক্লাউড সলিউশন
+    </h3>
+    <h1 class="text-[44px] font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 tracking-tight leading-tight mt-0.5 en">
+      SMART PHARMACY CLOUD ERP
+    </h1>
+    <p class="text-[16px] font-medium text-slate-300 max-w-2xl mx-auto mt-1 leading-snug">
+      সাপ্লায়ার পারচেজ, ৩-সেকেন্ড POS বিলিং, FEFO এক্সপায়ারি গার্ড ও ডক্টর কমিশন—সব এক প্ল্যাটফর্মে!
+    </p>
+  </div>
+
+  <!-- Centerpiece: Realistic MacBook & Mobile Mockup with Floating Value Cards -->
+  <div class="relative w-full h-[450px] flex items-center justify-center z-10 my-1">
+    
+    <!-- Floating Card: Left Top (FEFO) -->
+    <div class="absolute -left-2 top-6 z-30 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 w-56">
+      <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold">
+        🚨
+      </div>
+      <div>
+        <p class="text-xs font-bold text-white">FEFO এক্সপায়ারি গার্ড</p>
+        <p class="text-[11px] text-cyan-400 font-medium mt-0.5">অটোমেটিক রিটার্ন রিকুইজিশন</p>
+      </div>
+    </div>
+
+    <!-- Floating Card: Left Bottom (3-Sec POS) -->
+    <div class="absolute -left-2 bottom-10 z-30 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 w-56">
+      <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-bold">
+        ⚡
+      </div>
+      <div>
+        <p class="text-xs font-bold text-white">৩-সেকেন্ডে POS বিলিং</p>
+        <p class="text-[11px] text-blue-400 font-medium mt-0.5">বারকোড ও SMS ডিজিটাল রসিদ</p>
+      </div>
+    </div>
+
+    <!-- Floating Card: Right Top (Cash Drawer) -->
+    <div class="absolute -right-2 top-6 z-30 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 w-56">
+      <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">
+        💰
+      </div>
+      <div>
+        <p class="text-xs font-bold text-white">ক্যাশ ড্রয়ার রিকনসিলিয়েশন</p>
+        <p class="text-[11px] text-amber-400 font-medium mt-0.5">শিফট ক্লোজিং ও পাই-টু-পাই ট্যালি</p>
+      </div>
+    </div>
+
+    <!-- Floating Card: Right Bottom (Due Recovery) -->
+    <div class="absolute -right-2 bottom-10 z-30 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 w-56">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold">
+        📲
+      </div>
+      <div>
+        <p class="text-xs font-bold text-white">বাকি খাতা ও SMS তাগাদা</p>
+        <p class="text-[11px] text-emerald-400 font-medium mt-0.5">কাস্টমার ওয়াইজ ডিজিটাল হিসাব</p>
+      </div>
+    </div>
+
+    <!-- MacBook Mockup Container -->
+    <div class="relative w-[670px] flex flex-col items-center">
+      <div class="w-[660px] h-[360px] bg-slate-950 rounded-t-2xl p-3 pb-0 shadow-[0_25px_60px_-15px_rgba(6,182,212,0.35)] border-[3px] border-slate-700 relative flex flex-col">
+        <div class="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-slate-800 flex items-center justify-center">
+          <div class="w-1 h-1 rounded-full bg-slate-950"></div>
+        </div>
+        <div class="w-full h-full rounded-t-lg overflow-hidden bg-slate-900 relative">
+          <img src="file:///home/asibul/app/features/aidly/screenshots/Product_Expired_List.png" class="w-full h-full object-cover object-top" />
+          <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none"></div>
+        </div>
+      </div>
+      <div class="w-[740px] h-3.5 bg-gradient-to-r from-slate-600 via-slate-300 to-slate-600 rounded-b-xl shadow-2xl relative flex justify-center">
+        <div class="w-24 h-1.5 bg-slate-600 rounded-b-md"></div>
+      </div>
+    </div>
+
+    <!-- Smartphone Mockup -->
+    <div class="absolute bottom-2 right-20 z-20 w-[140px] h-[270px] bg-slate-900 rounded-[28px] p-2 shadow-2xl shadow-black/80 border-[3px] border-slate-700 flex flex-col transform rotate-2">
+      <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-3 bg-black rounded-full z-30"></div>
+      <div class="w-full h-full rounded-[20px] overflow-hidden bg-white relative">
+        <img src="file:///home/asibul/app/features/aidly/screenshots/Dashboard_Analytics.png" class="w-full h-full object-cover object-top" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 Trust Badges -->
+  <div class="grid grid-cols-4 gap-3 z-10 px-4 my-1">
+    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+      <p class="text-cyan-400 font-black text-sm en">☁ Cloud Ready</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">মোবাইল ও পিসিতে লাইভ</p>
+    </div>
+    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+      <p class="text-cyan-400 font-black text-sm en">🔒 Multi-Branch</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">সব শাখার সেন্ট্রাল স্টক</p>
+    </div>
+    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+      <p class="text-cyan-400 font-black text-sm en">⚡ Superfast POS</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">৩-সেকেন্ড বারকোড চেকআউট</p>
+    </div>
+    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 text-center">
+      <p class="text-cyan-400 font-black text-sm en">🤝 24/7 Support</p>
+      <p class="text-[11px] text-slate-400 mt-0.5">ডেডিকেটেড ট্রেইনিং ও সাপোর্ট</p>
+    </div>
+  </div>
+
+  <!-- Bottom Conversion Footer Bar -->
+  <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-4 px-6 flex items-center justify-between border border-blue-500/30 shadow-2xl z-10 mt-1">
+    <div class="flex items-center gap-2 text-sm font-semibold en">
+      <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-cyan-400 flex items-center justify-center">🌐</span>
+      <span>infoaidtech.net</span>
+    </div>
+    
+    <div class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-teal-400 text-slate-950 font-black text-sm shadow-lg shadow-cyan-400/25 cursor-pointer">
+      <span>🚀</span>
+      <span>ফ্রি লাইভ ডেমো বুক করুন</span>
+    </div>
+
+    <div class="flex items-center gap-2 text-sm font-semibold en">
+      <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-cyan-400 flex items-center justify-center">📞</span>
+      <span>WhatsApp: +880 1700-000000</span>
+    </div>
+  </div>
+
+</body>
+</html>
