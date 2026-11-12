@@ -9,3 +9,4 @@ venv/
 .DS_Store
 ai-product-video/
 *.mp4
+!aidly_bangla_*.mp4
