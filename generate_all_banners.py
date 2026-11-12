@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """
-Aidly PMS & Info AidTech Commercial Marketing Banner Generator
---------------------------------------------------------------
-Generates high-converting 1:1 square (1080x1080) and 1.91:1 landscape (1200x630)
-commercial marketing banners adopting real competitor ad themes (AppNexaa, SK Soft, Pyora).
-Embeds actual software screenshots from /home/asibul/app/features/aidly/screenshots
-inside realistic MacBook and mobile mockups with floating metric cards.
+Aidly PMS & Info AidTech High-Converting Commercial Banner Generator
+--------------------------------------------------------------------
+Compiles 6 distinct 1:1 square (1080x1080) commercial banners:
+3 for Aidly PMS (Pharma ERP/POS) and 3 for Info AidTech Marketing Agency.
 """
 
 import os
 import subprocess
-import tempfile
 
 BANNERS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "banners")
-SCREENSHOTS_DIR = "/home/asibul/app/features/aidly/screenshots"
 os.makedirs(BANNERS_DIR, exist_ok=True)
 
-# Templates are maintained in HTML format and compiled via headless Google Chrome
 TEMPLATES = [
+    # 3 Distinct Aidly PMS Themes
     ("banner_marketing_aidly_pos.png", "render_banner_theme_green.html"),
     ("banner_marketing_aidly_red.png", "render_banner_theme_red.html"),
     ("banner_marketing_aidly_blue.png", "render_banner_theme_blue.html"),
+    # 3 Distinct Agency Marketing Themes
+    ("banner_marketing_agency_meta_ads.png", "render_agency_meta_ads.html"),
+    ("banner_marketing_agency_google_ppc.png", "render_agency_google_ppc.html"),
+    ("banner_marketing_agency_custom_software.png", "render_agency_custom_software.html"),
 ]
 
 def generate():
@@ -41,7 +41,7 @@ def generate():
             f"--screenshot={out_path}",
             f"file://{html_path}",
         ]
-        print(f"Generating commercial banner: {out_name}...")
+        print(f"Compiling: {out_name}...")
         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print(f"  -> Generated {out_path} ({os.path.getsize(out_path)} bytes)")
 
