@@ -238,6 +238,63 @@ def publish_timeline_photo_post(
         sys.exit(1)
 
 
+def publish_timeline_video_post(
+    page_id: str,
+    page_token: str,
+    description: str,
+    video_path: str,
+    title: str = "Aidly PMS · Smart Pharmacy ERP & POS",
+) -> dict:
+    """
+    Publishes an MP4 video directly to the Facebook Page Timeline.
+    Uses POST /{page_id}/videos with multipart/form-data.
+    """
+    video_endpoint = f"{GRAPH_API_BASE}/{page_id}/videos"
+    logger.info("Uploading video file '%s' to Facebook Page %s...", video_path, page_id)
+
+    boundary = "----WebKitFormBoundary" + os.urandom(16).hex()
+    body = bytearray()
+
+    fields = [
+        ("access_token", page_token),
+        ("description", description),
+        ("title", title),
+    ]
+    for name, val in fields:
+        body.extend(f"--{boundary}\r\n".encode())
+        body.extend(f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode())
+        body.extend(f"{val}\r\n".encode())
+
+    filename = os.path.basename(video_path)
+    body.extend(f"--{boundary}\r\n".encode())
+    body.extend(f'Content-Disposition: form-data; name="source"; filename="{filename}"\r\n'.encode())
+    body.extend(b"Content-Type: video/mp4\r\n\r\n")
+    with open(video_path, "rb") as f:
+        body.extend(f.read())
+    body.extend(b"\r\n")
+    body.extend(f"--{boundary}--\r\n".encode())
+
+    req = urllib.request.Request(
+        url=video_endpoint,
+        data=body,
+        headers={
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "User-Agent": "AutomatedFBScheduler/4.0",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            video_result = json.loads(resp.read().decode("utf-8"))
+            logger.info("Facebook Timeline Video Published successfully: %s", video_result)
+            return video_result
+    except urllib.error.HTTPError as http_err:
+        err_body = http_err.read().decode("utf-8", errors="replace")
+        logger.error("Failed to upload video to Facebook (HTTP %d): %s", http_err.code, err_body)
+        sys.exit(1)
+
+
 def publish_timeline_feed_post(
     page_id: str,
     page_token: str,
@@ -313,7 +370,21 @@ def main():
         page_id,
     )
 
-    if image_url and image_url.strip():
+    if image_url and image_url.strip().lower().endswith(".mp4"):
+        resolved_video = image_url.strip()
+        if not os.path.isabs(resolved_video):
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            cand = os.path.join(base_dir, resolved_video)
+            if os.path.exists(cand):
+                resolved_video = cand
+        api_result = publish_timeline_video_post(
+            page_id=page_id,
+            page_token=page_token,
+            description=formatted_message,
+            video_path=resolved_video,
+            title=f"Aidly PMS · {category}",
+        )
+    elif image_url and image_url.strip():
         api_result = publish_timeline_photo_post(
             page_id=page_id,
             page_token=page_token,
