@@ -10,3 +10,12 @@ venv/
 ai-product-video/
 *.mp4
 !aidly_bangla_*.mp4
+# Local secrets written by `elevenlabs onboard`
+/.env.local
+node_modules/
+*.mp3
+*.wav
+*.webm
+yt-dlp
+yt_*
+
