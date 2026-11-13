@@ -27,8 +27,33 @@ def verify_facebook(page_id, page_token):
     except Exception as e:
         print(f"❌ Facebook Network Error: {e}")
 
+def verify_buffer(buffer_token):
+    print("\n--- 2. BUFFER (LINKEDIN COMPANY PAGE) CONNECTION ---")
+    if not buffer_token:
+        print("⚠️  BUFFER_ACCESS_TOKEN is not set in Secrets.")
+        return
+    url = "https://api.bufferapp.com/1/profiles.json"
+    req = urllib.request.Request(url, headers={
+        "Authorization": f"Bearer {buffer_token.strip()}",
+        "User-Agent": "HealthCheck/1.0"
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            profiles = json.loads(resp.read().decode())
+            print(f"✅ Buffer Connected successfully! Total connected channels: {len(profiles)}")
+            for p in profiles:
+                srv = p.get("formatted_service", p.get("service", "unknown"))
+                usr = p.get("formatted_username", p.get("service_username", "unknown"))
+                stype = p.get("service_type", "channel")
+                pid = p.get("id")
+                print(f"   -> [{srv} ({stype})] {usr} (ID: {pid})")
+    except urllib.error.HTTPError as e:
+        print(f"❌ Buffer API Error (HTTP {e.code}): {e.read().decode()}")
+    except Exception as e:
+        print(f"❌ Buffer Error: {e}")
+
 def verify_linkedin(linkedin_token, author_urn=None):
-    print("\n--- 2. LINKEDIN CONNECTION ---")
+    print("\n--- 3. DIRECT LINKEDIN API CONNECTION ---")
     if not linkedin_token:
         print("❌ LINKEDIN_ACCESS_TOKEN is missing or empty in Secrets.")
         return
@@ -105,11 +130,13 @@ def main():
     
     fb_id = os.getenv("FB_PAGE_ID")
     fb_token = os.getenv("FB_PAGE_TOKEN")
+    buf_token = os.getenv("BUFFER_ACCESS_TOKEN")
     li_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
     li_urn = os.getenv("LINKEDIN_AUTHOR_URN")
     el_key = os.getenv("ELEVENLABS_API_KEY")
 
     verify_facebook(fb_id, fb_token)
+    verify_buffer(buf_token)
     verify_linkedin(li_token, li_urn)
     verify_elevenlabs(el_key)
 

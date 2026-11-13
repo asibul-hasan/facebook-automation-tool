@@ -15,6 +15,7 @@ from post_to_fb import (
     load_posts,
     save_posts,
     publish_linkedin_post,
+    publish_buffer_post,
     render_facebook_markdown,
     DEFAULT_POSTS_FILE
 )
@@ -28,10 +29,11 @@ logger = logging.getLogger("linkedin_publisher")
 
 def main():
     target_id = sys.argv[1] if len(sys.argv) > 1 else "day1_slot1_agency_roi_funnel"
+    buffer_token = os.getenv("BUFFER_ACCESS_TOKEN")
     linkedin_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
 
-    if not linkedin_token or not linkedin_token.strip():
-        logger.error("LINKEDIN_ACCESS_TOKEN is missing or empty. Please set it in GitHub Secrets or environment.")
+    if not buffer_token and not linkedin_token:
+        logger.error("Neither BUFFER_ACCESS_TOKEN nor LINKEDIN_ACCESS_TOKEN is set. Please set at least one in GitHub Secrets or environment.")
         sys.exit(1)
 
     posts_file = os.getenv("POSTS_FILE_PATH", DEFAULT_POSTS_FILE)
@@ -56,33 +58,45 @@ def main():
     image_url = target_post.get("image_url")
     formatted_message = render_facebook_markdown(raw_message.strip())
 
-    resolved_image = None
-    if image_url and not image_url.strip().lower().endswith(".mp4"):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        cand1 = os.path.join(base_dir, image_url.strip())
-        if os.path.exists(cand1):
-            resolved_image = cand1
-        elif os.path.exists(image_url.strip()):
-            resolved_image = os.path.abspath(image_url.strip())
+    if buffer_token and buffer_token.strip():
+        logger.info("Publishing '%s' to LinkedIn Company Page via Buffer...", target_id)
+        res = publish_buffer_post(
+            buffer_token=buffer_token.strip(),
+            text=formatted_message,
+            media_relative_path=image_url,
+        )
+        if not res:
+            logger.error("Failed to publish post '%s' via Buffer.", target_id)
+            sys.exit(1)
+        updates = res.get("updates", [])
+        post_urn = updates[0].get("id") if updates else "buffer_success"
+    else:
+        resolved_image = None
+        if image_url and not image_url.strip().lower().endswith(".mp4"):
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            cand1 = os.path.join(base_dir, image_url.strip())
+            if os.path.exists(cand1):
+                resolved_image = cand1
+            elif os.path.exists(image_url.strip()):
+                resolved_image = os.path.abspath(image_url.strip())
 
-    logger.info("Publishing '%s' to LinkedIn (Image: %s)...", target_id, resolved_image)
-    res = publish_linkedin_post(
-        linkedin_token=linkedin_token.strip(),
-        message=formatted_message,
-        image_path=resolved_image,
-    )
+        logger.info("Publishing '%s' to LinkedIn (Direct API, Image: %s)...", target_id, resolved_image)
+        res = publish_linkedin_post(
+            linkedin_token=linkedin_token.strip(),
+            message=formatted_message,
+            image_path=resolved_image,
+        )
+        if not res:
+            logger.error("Failed to publish post '%s' to LinkedIn.", target_id)
+            sys.exit(1)
+        post_urn = res.get("id", "urn:li:share:unknown")
 
-    if not res:
-        logger.error("Failed to publish post '%s' to LinkedIn.", target_id)
-        sys.exit(1)
-
-    post_urn = res.get("id", "urn:li:share:unknown")
     target_post["linkedin_post_id"] = post_urn
     target_post["linkedin_published_at"] = datetime.now(timezone.utc).isoformat()
     posts[target_index] = target_post
     save_posts(posts_file, posts)
 
-    logger.info("🎉 SUCCESS! Post '%s' published to LinkedIn with URN: %s", target_id, post_urn)
+    logger.info("🎉 SUCCESS! Post '%s' published to LinkedIn with ID: %s", target_id, post_urn)
 
 if __name__ == "__main__":
     main()

@@ -502,6 +502,88 @@ def publish_linkedin_post(
 
 
 # ---------------------------------------------------------------------------
+# Buffer Integration (Direct LinkedIn Company Page Publishing)
+# ---------------------------------------------------------------------------
+def get_buffer_linkedin_profile_id(buffer_token: str) -> str | None:
+    """Auto-detects the connected LinkedIn profile or company page ID in Buffer."""
+    url = "https://api.bufferapp.com/1/profiles.json"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"Bearer {buffer_token.strip()}",
+            "User-Agent": "CrossPlatformScheduler/4.0",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            profiles = json.loads(resp.read().decode("utf-8"))
+            for p in profiles:
+                if p.get("service") == "linkedin":
+                    logger.info(
+                        "Found Buffer LinkedIn channel: %s (%s, ID: %s)",
+                        p.get("formatted_username", p.get("service_username")),
+                        p.get("service_type", "channel"),
+                        p.get("id"),
+                    )
+                    return p.get("id")
+    except Exception as e:
+        logger.warning("Could not query Buffer profiles: %s", e)
+    return None
+
+
+def publish_buffer_post(
+    buffer_token: str,
+    text: str,
+    media_relative_path: str | None = None,
+    profile_id: str | None = None,
+) -> dict | None:
+    """Publishes an update to Buffer (e.g. for LinkedIn Company Page)."""
+    if not profile_id:
+        profile_id = os.getenv("BUFFER_PROFILE_ID") or get_buffer_linkedin_profile_id(buffer_token)
+    if not profile_id:
+        logger.warning("No LinkedIn profile found in Buffer. Skipping Buffer post.")
+        return None
+
+    endpoint = "https://api.bufferapp.com/1/updates/create.json"
+    payload = {
+        "text": text,
+        "profile_ids[]": profile_id,
+        "now": "true",
+    }
+    if media_relative_path and media_relative_path.strip():
+        repo = os.getenv("GITHUB_REPOSITORY", "asibul-hasan/facebook-automation-tool")
+        public_url = f"https://raw.githubusercontent.com/{repo}/main/{media_relative_path.strip()}"
+        if media_relative_path.lower().endswith(".mp4"):
+            payload["media[video]"] = public_url
+        else:
+            payload["media[photo]"] = public_url
+
+    encoded = urllib.parse.urlencode(payload).encode("utf-8")
+    req = urllib.request.Request(
+        endpoint,
+        data=encoded,
+        headers={
+            "Authorization": f"Bearer {buffer_token.strip()}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "CrossPlatformScheduler/4.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            logger.info("Buffer post published successfully: %s", result.get("updates"))
+            return result
+    except urllib.error.HTTPError as err:
+        err_body = err.read().decode("utf-8", errors="replace")
+        logger.error("Buffer API Error (HTTP %d): %s", err.code, err_body)
+        return None
+    except Exception as err:
+        logger.error("Network error posting to Buffer: %s", err)
+        return None
+
+
+# ---------------------------------------------------------------------------
 # Instagram Integration (via Meta Graph API)
 # ---------------------------------------------------------------------------
 def get_instagram_account_id(page_id: str, page_token: str) -> str | None:
@@ -718,10 +800,23 @@ def main():
     target_post["published_at"] = datetime.now(timezone.utc).isoformat()
 
     # -----------------------------------------------------------------------
-    # Step 3: Multi-Platform Cross-Posting (LinkedIn)
+    # Step 3: Multi-Platform Cross-Posting (LinkedIn via Buffer or Direct API)
     # -----------------------------------------------------------------------
+    buffer_token = os.getenv("BUFFER_ACCESS_TOKEN")
     linkedin_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
-    if linkedin_token and linkedin_token.strip():
+
+    if buffer_token and buffer_token.strip():
+        logger.info("Triggering Buffer (LinkedIn Company Page) cross-post for post ID: %s...", post_id)
+        buf_result = publish_buffer_post(
+            buffer_token=buffer_token.strip(),
+            text=formatted_message,
+            media_relative_path=image_url,
+        )
+        if buf_result:
+            updates = buf_result.get("updates", [])
+            target_post["buffer_update_id"] = updates[0].get("id") if updates else "success"
+            target_post["linkedin_post_id"] = target_post["buffer_update_id"]
+    elif linkedin_token and linkedin_token.strip():
         resolved_image = None
         if image_url and not image_url.strip().lower().endswith(".mp4"):
             base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -731,7 +826,7 @@ def main():
             elif os.path.exists(image_url.strip()):
                 resolved_image = os.path.abspath(image_url.strip())
 
-        logger.info("Triggering LinkedIn cross-post for post ID: %s...", post_id)
+        logger.info("Triggering direct LinkedIn cross-post for post ID: %s...", post_id)
         li_result = publish_linkedin_post(
             linkedin_token=linkedin_token.strip(),
             message=formatted_message,
@@ -740,7 +835,7 @@ def main():
         if li_result:
             target_post["linkedin_post_id"] = li_result.get("id")
     else:
-        logger.info("LinkedIn cross-posting skipped (LINKEDIN_ACCESS_TOKEN not set).")
+        logger.info("LinkedIn cross-posting skipped (Neither BUFFER_ACCESS_TOKEN nor LINKEDIN_ACCESS_TOKEN set).")
 
     # -----------------------------------------------------------------------
     # Step 4: Multi-Platform Cross-Posting (Instagram)
