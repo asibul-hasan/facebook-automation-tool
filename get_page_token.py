@@ -79,15 +79,16 @@ def main():
 
     print("[+] Long-lived user token obtained successfully.")
 
-    print("[*] Retrieving Pages and Permanent Page Access Tokens...")
-    accounts_url = f"{GRAPH_BASE}/me/accounts?{urllib.parse.urlencode({'access_token': long_lived_token})}"
+    print("[*] Retrieving Pages, Permanent Page Access Tokens, and Connected Instagram Accounts...")
+    accounts_url = f"{GRAPH_BASE}/me/accounts?{urllib.parse.urlencode({'access_token': long_lived_token, 'fields': 'id,name,access_token,instagram_business_account,page_backed_instagram_accounts,connected_instagram_account'})}"
     accounts_resp = make_get_request(accounts_url)
 
     pages = accounts_resp.get("data", [])
     if not pages:
         print("\n[!] No pages found for this user account.")
-        print("    Ensure your user is an Admin of the Page and you approved")
-        print("    'pages_show_list', 'pages_read_engagement', and 'pages_manage_posts'.")
+        print("    Ensure your user is an Admin of the Page and you approved:")
+        print("    'pages_show_list', 'pages_read_engagement', 'pages_manage_posts',")
+        print("    'instagram_basic', and 'instagram_content_publish'.")
         sys.exit(1)
 
     print("\n" + "=" * 65)
@@ -99,16 +100,32 @@ def main():
         page_id = page.get("id")
         page_token = page.get("access_token")
 
+        # Discover Instagram Account ID
+        ig_id = None
+        ig_biz = page.get("instagram_business_account")
+        if ig_biz and ig_biz.get("id"):
+            ig_id = ig_biz.get("id")
+        elif page.get("page_backed_instagram_accounts", {}).get("data"):
+            ig_id = page["page_backed_instagram_accounts"]["data"][0].get("id")
+        elif page.get("connected_instagram_account", {}).get("id"):
+            ig_id = page["connected_instagram_account"]["id"]
+
         print(f"\n--- Page {idx}: {name} ---")
         print(f"Secret Name : FB_PAGE_ID")
-        print(f"Secret Value: {page_id}")
-        print()
+        print(f"Secret Value: {page_id}\n")
         print(f"Secret Name : FB_PAGE_TOKEN")
-        print(f"Secret Value: {page_token}")
+        print(f"Secret Value: {page_token}\n")
+
+        if ig_id:
+            print(f"Secret Name : IG_ACCOUNT_ID")
+            print(f"Secret Value: {ig_id}\n")
+            print(f"[+] Connected Instagram Account ID: {ig_id}")
+        else:
+            print("[!] Note: No linked Instagram business/creator account detected.")
 
     print("\n" + "=" * 65)
     print("These Page Access Tokens DO NOT EXPIRE.")
-    print("Copy FB_PAGE_ID and FB_PAGE_TOKEN directly into your GitHub Secrets.")
+    print("Add/Update FB_PAGE_ID, FB_PAGE_TOKEN, and IG_ACCOUNT_ID in your GitHub Secrets.")
     print("=" * 65 + "\n")
 
 

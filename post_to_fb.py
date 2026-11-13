@@ -505,17 +505,42 @@ def publish_linkedin_post(
 # Instagram Integration (via Meta Graph API)
 # ---------------------------------------------------------------------------
 def get_instagram_account_id(page_id: str, page_token: str) -> str | None:
-    """Fetch the connected Instagram Business Account ID for the Facebook Page."""
-    url = f"{GRAPH_API_BASE}/{page_id}?fields=instagram_business_account&access_token={page_token}"
+    """Fetch the connected Instagram Business/Creator Account ID for the Facebook Page."""
+    # 1. Environment variable override
+    env_ig_id = os.getenv("IG_ACCOUNT_ID") or os.getenv("INSTAGRAM_ACCOUNT_ID")
+    if env_ig_id and env_ig_id.strip():
+        logger.info("Using configured IG_ACCOUNT_ID from environment: %s", env_ig_id.strip())
+        return env_ig_id.strip()
+
+    # 2. Query Meta Graph API for connected Instagram accounts
+    fields = "instagram_business_account,page_backed_instagram_accounts,connected_instagram_account"
+    url = f"{GRAPH_API_BASE}/{page_id}?fields={fields}&access_token={page_token}"
     req = urllib.request.Request(url=url, headers={"User-Agent": "CrossPlatformScheduler/4.0"})
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            ig = data.get("instagram_business_account")
-            if ig and ig.get("id"):
-                return ig.get("id")
+
+            # Check standard Instagram Business/Creator Account
+            ig_biz = data.get("instagram_business_account")
+            if ig_biz and ig_biz.get("id"):
+                logger.info("Found connected Instagram Business Account: %s", ig_biz.get("id"))
+                return ig_biz.get("id")
+
+            # Check Page-backed Instagram accounts
+            pbia = data.get("page_backed_instagram_accounts", {}).get("data", [])
+            if pbia and pbia[0].get("id"):
+                logger.info("Found Page-Backed Instagram Account: %s", pbia[0].get("id"))
+                return pbia[0].get("id")
+
+            # Check connected instagram account
+            cia = data.get("connected_instagram_account")
+            if cia and cia.get("id"):
+                logger.info("Found connected Instagram Account: %s", cia.get("id"))
+                return cia.get("id")
+
+            logger.warning("No linked Instagram account found on Facebook Page %s.", page_id)
     except Exception as e:
-        logger.warning("Could not query instagram_business_account: %s", e)
+        logger.warning("Could not query Instagram account fields from Meta Graph API: %s", e)
     return None
 
 
@@ -535,7 +560,7 @@ def publish_instagram_post(
         media_url = f"{GRAPH_API_BASE}/{ig_user_id}/media"
 
         if is_video:
-            logger.info("Creating Instagram Reel container for: %s", media_relative_path)
+            logger.info("Creating Instagram Reel container for: %s (URL: %s)", media_relative_path, public_url)
             payload = {
                 "media_type": "REELS",
                 "video_url": public_url,
@@ -543,7 +568,7 @@ def publish_instagram_post(
                 "access_token": page_token,
             }
         else:
-            logger.info("Creating Instagram Photo container for: %s", media_relative_path)
+            logger.info("Creating Instagram Photo container for: %s (URL: %s)", media_relative_path, public_url)
             payload = {
                 "image_url": public_url,
                 "caption": caption,
@@ -554,20 +579,40 @@ def publish_instagram_post(
         req = urllib.request.Request(
             url=media_url,
             data=encoded,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "CrossPlatformScheduler/4.0"},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            creation_res = json.loads(resp.read().decode("utf-8"))
-            creation_id = creation_res.get("id")
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                creation_res = json.loads(resp.read().decode("utf-8"))
+                creation_id = creation_res.get("id")
+        except urllib.error.HTTPError as err:
+            err_body = err.read().decode("utf-8", errors="replace")
+            logger.error("Failed to create Instagram media container (HTTP %d): %s", err.code, err_body)
+            return None
 
         if not creation_id:
-            logger.warning("No creation_id received from Instagram.")
+            logger.warning("No creation_id received from Instagram for %s.", media_relative_path)
             return None
 
         if is_video:
-            logger.info("Waiting 15 seconds for Instagram Reel transcoding...")
-            time.sleep(15)
+            logger.info("Polling Instagram Reel transcoding status for container %s...", creation_id)
+            status_url = f"{GRAPH_API_BASE}/{creation_id}?fields=status_code,status&access_token={page_token}"
+            poll_req = urllib.request.Request(url=status_url, headers={"User-Agent": "CrossPlatformScheduler/4.0"})
+            for attempt in range(1, 19):
+                time.sleep(5)
+                try:
+                    with urllib.request.urlopen(poll_req, timeout=20) as status_resp:
+                        status_data = json.loads(status_resp.read().decode("utf-8"))
+                        status_code = status_data.get("status_code")
+                        logger.info("Instagram Reel status [Attempt %d/18]: %s", attempt, status_code)
+                        if status_code == "FINISHED":
+                            break
+                        elif status_code in ("ERROR", "EXPIRED"):
+                            logger.error("Instagram Reel processing failed: %s", status_data)
+                            return None
+                except Exception as pe:
+                    logger.warning("Could not check container status on attempt %d: %s", attempt, pe)
 
         publish_url = f"{GRAPH_API_BASE}/{ig_user_id}/media_publish"
         pub_payload = urllib.parse.urlencode({
@@ -577,13 +622,18 @@ def publish_instagram_post(
         pub_req = urllib.request.Request(
             url=publish_url,
             data=pub_payload,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "CrossPlatformScheduler/4.0"},
             method="POST",
         )
-        with urllib.request.urlopen(pub_req, timeout=45) as pub_resp:
-            pub_res = json.loads(pub_resp.read().decode("utf-8"))
-            logger.info("Instagram Post Published successfully: %s", pub_res)
-            return pub_res
+        try:
+            with urllib.request.urlopen(pub_req, timeout=45) as pub_resp:
+                pub_res = json.loads(pub_resp.read().decode("utf-8"))
+                logger.info("Instagram Post Published successfully: %s", pub_res)
+                return pub_res
+        except urllib.error.HTTPError as err:
+            err_body = err.read().decode("utf-8", errors="replace")
+            logger.error("Failed to publish Instagram media container (HTTP %d): %s", err.code, err_body)
+            return None
     except Exception as e:
         logger.warning("Could not publish to Instagram: %s", e)
         return None
