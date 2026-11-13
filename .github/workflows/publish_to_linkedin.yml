@@ -1,0 +1,48 @@
+name: Publish Post to LinkedIn
+
+on:
+  workflow_dispatch:
+    inputs:
+      post_id:
+        description: 'Post ID from posts.json to publish to LinkedIn'
+        required: true
+        default: 'day1_slot1_agency_roi_funnel'
+
+permissions:
+  contents: write
+
+jobs:
+  publish_linkedin:
+    name: Publish to LinkedIn
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Execute LinkedIn Publisher
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
+        run: python publish_single_to_linkedin.py "${{ github.event.inputs.post_id }}"
+
+      - name: Commit and push updated posts queue
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add posts.json
+
+          if git diff --staged --quiet; then
+            echo "No changes in posts.json detected. Skipping git commit."
+          else
+            git commit -m "chore(linkedin): record linkedin_post_id for ${{ github.event.inputs.post_id }} [skip ci]"
+            git pull --rebase
+            git push
+          fi
