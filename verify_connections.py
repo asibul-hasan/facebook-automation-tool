@@ -10,6 +10,9 @@ import os
 import json
 import urllib.request
 import urllib.error
+from post_to_fb import load_env_local
+
+load_env_local()
 
 def verify_facebook(page_id, page_token):
     print("\n--- 1. FACEBOOK PAGE CONNECTION ---")

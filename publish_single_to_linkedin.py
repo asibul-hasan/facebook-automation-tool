@@ -17,8 +17,11 @@ from post_to_fb import (
     publish_linkedin_post,
     publish_buffer_post,
     render_facebook_markdown,
-    DEFAULT_POSTS_FILE
+    DEFAULT_POSTS_FILE,
+    load_env_local
 )
+
+load_env_local()
 
 logging.basicConfig(
     level=logging.INFO,

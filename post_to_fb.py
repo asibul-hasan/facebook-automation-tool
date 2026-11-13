@@ -30,6 +30,23 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+# Safely load local secrets from .env.local if present
+def load_env_local():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    for cand in [os.path.join(base_dir, ".env.local"), os.path.join(base_dir, ".env")]:
+        if os.path.exists(cand):
+            with open(cand, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+
+load_env_local()
+
 # ---------------------------------------------------------------------------
 # Configuration & Logging
 # ---------------------------------------------------------------------------
