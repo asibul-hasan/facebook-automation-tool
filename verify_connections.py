@@ -35,21 +35,64 @@ def verify_buffer(buffer_token):
     if not buffer_token:
         print("⚠️  BUFFER_ACCESS_TOKEN is not set in Secrets.")
         return
-    url = "https://api.bufferapp.com/1/profiles.json"
-    req = urllib.request.Request(url, headers={
-        "Authorization": f"Bearer {buffer_token.strip()}",
-        "User-Agent": "HealthCheck/1.0"
-    })
+    endpoint = "https://api.buffer.com"
+    org_query = """
+    query {
+      account {
+        id
+        email
+        organizations {
+          id
+          name
+        }
+      }
+    }
+    """
+    req = urllib.request.Request(
+        endpoint,
+        data=json.dumps({"query": org_query}).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {buffer_token.strip()}",
+            "Content-Type": "application/json",
+            "User-Agent": "HealthCheck/1.0"
+        },
+        method="POST"
+    )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
-            profiles = json.loads(resp.read().decode())
-            print(f"✅ Buffer Connected successfully! Total connected channels: {len(profiles)}")
-            for p in profiles:
-                srv = p.get("formatted_service", p.get("service", "unknown"))
-                usr = p.get("formatted_username", p.get("service_username", "unknown"))
-                stype = p.get("service_type", "channel")
-                pid = p.get("id")
-                print(f"   -> [{srv} ({stype})] {usr} (ID: {pid})")
+            data = json.loads(resp.read().decode("utf-8"))
+            acc = data.get("data", {}).get("account", {})
+            orgs = acc.get("organizations", [])
+            print(f"✅ Buffer GraphQL Connected! Account: {acc.get('email')}")
+            for org in orgs:
+                org_id = org.get("id")
+                chan_query = """
+                query GetChannels($orgId: OrganizationId!) {
+                  channels(input: { organizationId: $orgId }) {
+                    id
+                    name
+                    displayName
+                    service
+                    serviceId
+                  }
+                }
+                """
+                req2 = urllib.request.Request(
+                    endpoint,
+                    data=json.dumps({"query": chan_query, "variables": {"orgId": org_id}}).encode("utf-8"),
+                    headers={
+                        "Authorization": f"Bearer {buffer_token.strip()}",
+                        "Content-Type": "application/json",
+                        "User-Agent": "HealthCheck/1.0"
+                    },
+                    method="POST"
+                )
+                with urllib.request.urlopen(req2, timeout=15) as c_resp:
+                    c_data = json.loads(c_resp.read().decode("utf-8"))
+                    channels = c_data.get("data", {}).get("channels", [])
+                    print(f"   Organization: '{org.get('name')}' (ID: {org_id}) - Channels: {len(channels)}")
+                    for c in channels:
+                        print(f"   -> [{c.get('service').upper()}] {c.get('displayName') or c.get('name')} (Channel ID: {c.get('id')}, Target: {c.get('serviceId')})")
     except urllib.error.HTTPError as e:
         print(f"❌ Buffer API Error (HTTP {e.code}): {e.read().decode()}")
     except Exception as e:

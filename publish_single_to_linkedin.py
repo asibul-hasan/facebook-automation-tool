@@ -71,8 +71,8 @@ def main():
         if not res:
             logger.error("Failed to publish post '%s' via Buffer.", target_id)
             sys.exit(1)
-        updates = res.get("updates", [])
-        post_urn = updates[0].get("id") if updates else "buffer_success"
+        post_urn = res.get("id") or (res.get("updates", [{}])[0].get("id")) or "buffer_success"
+        target_post["buffer_update_id"] = post_urn
     else:
         resolved_image = None
         if image_url and not image_url.strip().lower().endswith(".mp4"):

@@ -522,29 +522,81 @@ def publish_linkedin_post(
 # Buffer Integration (Direct LinkedIn Company Page Publishing)
 # ---------------------------------------------------------------------------
 def get_buffer_linkedin_profile_id(buffer_token: str) -> str | None:
-    """Auto-detects the connected LinkedIn profile or company page ID in Buffer."""
-    url = "https://api.bufferapp.com/1/profiles.json"
+    """Auto-detects the connected LinkedIn profile or company page Channel ID in Buffer via GraphQL."""
+    env_chan = os.getenv("BUFFER_CHANNEL_ID") or os.getenv("BUFFER_PROFILE_ID")
+    if env_chan and env_chan.strip():
+        return env_chan.strip()
+
+    endpoint = "https://api.buffer.com"
+    org_query = """
+    query {
+      account {
+        organizations {
+          id
+          name
+        }
+      }
+    }
+    """
     req = urllib.request.Request(
-        url,
+        endpoint,
+        data=json.dumps({"query": org_query}).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {buffer_token.strip()}",
+            "Content-Type": "application/json",
             "User-Agent": "CrossPlatformScheduler/4.0",
         },
+        method="POST",
     )
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
-            profiles = json.loads(resp.read().decode("utf-8"))
-            for p in profiles:
-                if p.get("service") == "linkedin":
-                    logger.info(
-                        "Found Buffer LinkedIn channel: %s (%s, ID: %s)",
-                        p.get("formatted_username", p.get("service_username")),
-                        p.get("service_type", "channel"),
-                        p.get("id"),
-                    )
-                    return p.get("id")
+            data = json.loads(resp.read().decode("utf-8"))
+            orgs = data.get("data", {}).get("account", {}).get("organizations", [])
+            if not orgs:
+                logger.warning("No organizations found for Buffer account.")
+                return None
+            org_id = orgs[0]["id"]
     except Exception as e:
-        logger.warning("Could not query Buffer profiles: %s", e)
+        logger.warning("Could not query Buffer account organizations: %s", e)
+        return None
+
+    chan_query = """
+    query GetChannels($orgId: OrganizationId!) {
+      channels(input: { organizationId: $orgId }) {
+        id
+        name
+        displayName
+        service
+        serviceId
+      }
+    }
+    """
+    req2 = urllib.request.Request(
+        endpoint,
+        data=json.dumps({"query": chan_query, "variables": {"orgId": org_id}}).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {buffer_token.strip()}",
+            "Content-Type": "application/json",
+            "User-Agent": "CrossPlatformScheduler/4.0",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req2, timeout=20) as resp2:
+            data2 = json.loads(resp2.read().decode("utf-8"))
+            channels = data2.get("data", {}).get("channels", [])
+            for c in channels:
+                if c.get("service") == "linkedin":
+                    logger.info(
+                        "Found Buffer LinkedIn channel: %s (%s, ID: %s, target: %s)",
+                        c.get("displayName") or c.get("name"),
+                        c.get("service"),
+                        c.get("id"),
+                        c.get("serviceId"),
+                    )
+                    return c.get("id")
+    except Exception as e:
+        logger.warning("Could not query Buffer organization channels: %s", e)
     return None
 
 
@@ -554,34 +606,70 @@ def publish_buffer_post(
     media_relative_path: str | None = None,
     profile_id: str | None = None,
 ) -> dict | None:
-    """Publishes an update to Buffer (e.g. for LinkedIn Company Page)."""
+    """Publishes an update to Buffer (for LinkedIn Company Page) via GraphQL API."""
     if not profile_id:
-        profile_id = os.getenv("BUFFER_PROFILE_ID") or get_buffer_linkedin_profile_id(buffer_token)
+        profile_id = get_buffer_linkedin_profile_id(buffer_token)
     if not profile_id:
-        logger.warning("No LinkedIn profile found in Buffer. Skipping Buffer post.")
+        logger.warning("No LinkedIn channel found in Buffer. Skipping Buffer post.")
         return None
 
-    endpoint = "https://api.bufferapp.com/1/updates/create.json"
-    payload = {
-        "text": text,
-        "profile_ids[]": profile_id,
-        "now": "true",
-    }
+    endpoint = "https://api.buffer.com"
+    assets = []
     if media_relative_path and media_relative_path.strip():
         repo = os.getenv("GITHUB_REPOSITORY", "asibul-hasan/facebook-automation-tool")
         public_url = f"https://raw.githubusercontent.com/{repo}/main/{media_relative_path.strip()}"
         if media_relative_path.lower().endswith(".mp4"):
-            payload["media[video]"] = public_url
+            assets.append({"video": {"url": public_url}})
         else:
-            payload["media[photo]"] = public_url
+            assets.append({"image": {"url": public_url}})
 
-    encoded = urllib.parse.urlencode(payload).encode("utf-8")
+    mutation = """
+    mutation CreatePost($input: CreatePostInput!) {
+      createPost(input: $input) {
+        ... on PostActionSuccess {
+          post {
+            id
+            status
+          }
+        }
+        ... on InvalidInputError {
+          message
+        }
+        ... on UnauthorizedError {
+          message
+        }
+        ... on UnexpectedError {
+          message
+        }
+        ... on RestProxyError {
+          message
+        }
+        ... on LimitReachedError {
+          message
+        }
+        ... on NotFoundError {
+          message
+        }
+      }
+    }
+    """
+    variables = {
+        "input": {
+            "channelId": profile_id,
+            "text": text,
+            "mode": "shareNow",
+            "schedulingType": "automatic",
+            "needsApproval": False,
+            "assets": assets,
+        }
+    }
+
     req = urllib.request.Request(
         endpoint,
-        data=encoded,
+        data=json.dumps({"query": mutation, "variables": variables}).encode("utf-8"),
         headers={
             "Authorization": f"Bearer {buffer_token.strip()}",
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
             "User-Agent": "CrossPlatformScheduler/4.0",
         },
         method="POST",
@@ -589,8 +677,21 @@ def publish_buffer_post(
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read().decode("utf-8"))
-            logger.info("Buffer post published successfully: %s", result.get("updates"))
-            return result
+            create_data = result.get("data", {}).get("createPost", {})
+            if "post" in create_data:
+                post_id = create_data["post"].get("id")
+                status = create_data["post"].get("status")
+                logger.info("Buffer GraphQL post published successfully: ID %s (status: %s)", post_id, status)
+                return {
+                    "id": post_id,
+                    "status": status,
+                    "updates": [{"id": post_id, "status": status}],
+                    "raw": result,
+                }
+            else:
+                err_msg = create_data.get("message") or str(result)
+                logger.error("Buffer GraphQL CreatePost error: %s", err_msg)
+                return None
     except urllib.error.HTTPError as err:
         err_body = err.read().decode("utf-8", errors="replace")
         logger.error("Buffer API Error (HTTP %d): %s", err.code, err_body)
@@ -830,9 +931,10 @@ def main():
             media_relative_path=image_url,
         )
         if buf_result:
-            updates = buf_result.get("updates", [])
-            target_post["buffer_update_id"] = updates[0].get("id") if updates else "success"
-            target_post["linkedin_post_id"] = target_post["buffer_update_id"]
+            post_id_val = buf_result.get("id") or (buf_result.get("updates", [{}])[0].get("id"))
+            target_post["buffer_update_id"] = post_id_val
+            target_post["linkedin_post_id"] = post_id_val
+            target_post["linkedin_published_at"] = datetime.now(timezone.utc).isoformat()
     elif linkedin_token and linkedin_token.strip():
         resolved_image = None
         if image_url and not image_url.strip().lower().endswith(".mp4"):
