@@ -19,4 +19,6 @@ node_modules/
 yt-dlp
 yt_*
 .agents/skills/
+.hyperframes/
+snapshots/
 
