@@ -18,4 +18,5 @@ node_modules/
 *.webm
 yt-dlp
 yt_*
+.agents/skills/
 
