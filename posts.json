@@ -305,6 +305,72 @@
     "published_at": "2026-11-19T22:20:23.061818+00:00",
     "buffer_update_id": "6aff762748bc5f5e45a5537b",
     "linkedin_post_id": "6aff762748bc5f5e45a5537b",
-    "linkedin_published_at": "2026-11-19T22:20:34.283518+00:00"
+    "linkedin_published_at": "2026-11-19T22:20:34.283518+00:00",
+    "published": false
+  },
+  {
+    "id": "custom_slot_1114_1209",
+    "category": "Scheduled via Chat Copilot",
+    "message": "🚀 Announcing Aidly Cloud POS v2 with offline billing!",
+    "link": "https://infoaidtech.net",
+    "image_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200",
+    "approved": true,
+    "published": false,
+    "created_at": "2026-11-14T12:09:45.850541"
+  },
+  {
+    "id": "custom_slot_1114_1211",
+    "category": "Scheduled via Chat Copilot",
+    "message": "🚀 Launching our AI automated inventory tracker for retail pharmacies!",
+    "link": "https://infoaidtech.net",
+    "image_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200",
+    "approved": true,
+    "published": false,
+    "created_at": "2026-11-14T12:11:49.867769"
+  },
+  {
+    "id": "sched_1114_1254_exclusive_preview_a",
+    "category": "Aidly PMS",
+    "message": "🔥 Exclusive Preview: Aidly PMS v3 includes automatic drug interaction warnings and FEFO stock protection!",
+    "link": "https://infoaidtech.net/aidly-pms",
+    "image_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200",
+    "approved": true,
+    "published": false,
+    "scheduled_at": "2026-11-15T16:00:00",
+    "platforms": [
+      "Facebook",
+      "LinkedIn"
+    ],
+    "created_at": "2026-11-14T06:54:01.595175+00:00"
+  },
+  {
+    "id": "sched_1114_1254_schedule_a_post_for",
+    "category": "Scheduled via Chat Copilot",
+    "message": "Schedule a post for tomorrow at 2pm: Discover the future of AI Agent engineering with Aidlybot!",
+    "link": "https://infoaidtech.net",
+    "image_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200",
+    "approved": true,
+    "published": false,
+    "scheduled_at": "tomorrow at 2pm",
+    "platforms": [
+      "Facebook",
+      "LinkedIn"
+    ],
+    "created_at": "2026-11-14T06:54:22.350078+00:00"
+  },
+  {
+    "id": "sched_1114_1254_discover_the_future",
+    "category": "Scheduled via Chat Copilot",
+    "message": "Discover the future of AI Agent engineering with Aidlybot!",
+    "link": "https://infoaidtech.net",
+    "image_url": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200",
+    "approved": true,
+    "published": false,
+    "scheduled_at": "tomorrow at 2pm",
+    "platforms": [
+      "Facebook",
+      "LinkedIn"
+    ],
+    "created_at": "2026-11-14T06:54:54.470061+00:00"
   }
 ]
