@@ -215,6 +215,14 @@
     >
       <div class="grid-pattern"></div>
 
+      <!-- Master Audio Track -->
+      <audio
+        id="voiceover"
+        src="./assets/voiceover.mp3"
+        data-start="0"
+        data-duration="30"
+      ></audio>
+
       <!-- ============================================================ -->
       <!-- SCENE 1 (0.0s – 3.0s): The Hook (Evening Counter Emergency) -->
       <!-- ============================================================ -->
@@ -256,8 +264,8 @@
         <img
           id="logo-scene3"
           src="./assets/aidly-logo.svg"
-          data-start="9"
-          data-duration="4"
+          data-start="9.5"
+          data-duration="4.5"
           alt="Aidly PMS Logo"
           style="width: 380px; height: auto; margin-bottom: 30px;"
         />
@@ -352,21 +360,21 @@
       const tl = gsap.timeline({ paused: true });
 
       // Helper for clean cross-fades
-      // Scene 1: 0.0s - 3.0s
+      // Scene 1: 0.0s - 4.5s
       tl.fromTo("#scene1", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }, 0.0);
-      tl.to("#scene1", { opacity: 0, scale: 1.04, duration: 0.35, ease: "power2.in" }, 2.65);
+      tl.to("#scene1", { opacity: 0, scale: 1.04, duration: 0.35, ease: "power2.in" }, 4.15);
 
-      // Scene 2: 3.0s - 9.0s
-      tl.fromTo("#scene2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 3.0);
-      tl.to("#scene2", { opacity: 0, scale: 0.98, duration: 0.35, ease: "power2.in" }, 8.65);
+      // Scene 2: 4.5s - 9.5s
+      tl.fromTo("#scene2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 4.5);
+      tl.to("#scene2", { opacity: 0, scale: 0.98, duration: 0.35, ease: "power2.in" }, 9.15);
 
-      // Scene 3: 9.0s - 13.0s
-      tl.fromTo("#scene3", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 9.0);
-      tl.to("#scene3", { opacity: 0, duration: 0.3, ease: "power2.in" }, 12.7);
+      // Scene 3: 9.5s - 14.0s
+      tl.fromTo("#scene3", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }, 9.5);
+      tl.to("#scene3", { opacity: 0, duration: 0.3, ease: "power2.in" }, 13.65);
 
-      // Scene 4: 13.0s - 20.0s (POS Billing Demo)
-      tl.fromTo("#scene4", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 13.0);
-      tl.fromTo("#scene4 .mockup-container", { scale: 0.92, opacity: 0.8 }, { scale: 1, opacity: 1, duration: 6.5, ease: "none" }, 13.2);
+      // Scene 4: 14.0s - 20.0s (POS Billing Demo)
+      tl.fromTo("#scene4", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 14.0);
+      tl.fromTo("#scene4 .mockup-container", { scale: 0.92, opacity: 0.8 }, { scale: 1, opacity: 1, duration: 5.6, ease: "none" }, 14.2);
       tl.to("#scene4", { opacity: 0, duration: 0.35, ease: "power2.in" }, 19.65);
 
       // Scene 5: 20.0s - 25.0s (Expiry Alert Demo)
