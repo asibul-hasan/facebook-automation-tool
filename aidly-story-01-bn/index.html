@@ -1,221 +1,268 @@
-<!doctype html>
-<html lang="bn" data-resolution="portrait">
+<!DOCTYPE html>
+<html lang="bn">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=1080, height=1920" />
-    <title>Aidly PMS — 30s Dhaka Localized Story</title>
-    <!-- Google Fonts: Hind Siliguri for authentic Bangla & Plus Jakarta Sans for UI English -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aidly PMS – 30s Bengali Story Promo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <style>
-      :root {
-        --bg-main: #090d16;
-        --bg-surface: #111827;
-        --text-primary: #ffffff;
-        --text-secondary: #94a3b8;
-        --accent-emerald: #10b981;
-        --accent-emerald-light: #34d399;
-        --accent-red: #ef4444;
-        --accent-amber: #f59e0b;
-        --font-bangla: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
-        --font-display: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
-      }
-
       * {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
       }
-
-      html, body {
-        margin: 0;
+      html,
+      body {
         width: 1080px;
         height: 1920px;
         overflow: hidden;
-        background: var(--bg-main);
-        font-family: var(--font-bangla);
-        color: var(--text-primary);
+        background: #0a0f18;
+        font-family: "Noto Sans Bengali", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        color: #ffffff;
         -webkit-font-smoothing: antialiased;
       }
-
-      #root {
+      .stage {
         position: relative;
         width: 1080px;
         height: 1920px;
         overflow: hidden;
-        background: radial-gradient(circle at 50% 20%, #1e293b 0%, #090d16 80%);
+        background: linear-gradient(180deg, #131c2b 0%, #0a0f18 100%);
       }
-
-      /* Noise & subtle grid texture */
-      .grid-pattern {
+      .stage::before {
+        content: "";
         position: absolute;
         inset: 0;
-        background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-        background-size: 60px 60px;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: 64px 64px;
         pointer-events: none;
       }
-
-      /* Safe Zone Margins: Top 150px, Bottom 380px, Right 130px, Left 60px */
+      /* Top Progress Bar */
+      .bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 14px;
+        background: #10b981;
+        width: 0%;
+        z-index: 50;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+      }
+      /* Common Scene Layout */
       .scene {
         position: absolute;
         inset: 0;
-        width: 1080px;
-        height: 1920px;
-        padding: 160px 80px 400px 80px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
+        gap: 36px;
+        padding: 80px 70px 180px 70px;
         text-align: center;
         opacity: 0;
-        pointer-events: none;
       }
-
-      /* Badge / Pill styling with generous padding to prevent Bangla diacritic clipping */
-      .pill {
+      /* Typography */
+      .h {
+        font-size: 64px;
+        font-weight: 800;
+        line-height: 1.35;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+      }
+      .s {
+        font-size: 34px;
+        color: #a9b6c6;
+        line-height: 1.5;
+        max-width: 900px;
+      }
+      .red {
+        color: #ff6b6b;
+      }
+      .grn {
+        color: #2fe0a0;
+      }
+      /* Pill Badges */
+      .badge {
+        font-size: 30px;
+        font-weight: 700;
+        border-radius: 999px;
+        padding: 16px 36px;
+        border: 1.5px solid;
         display: inline-flex;
         align-items: center;
         gap: 12px;
-        padding: 16px 32px;
-        border-radius: 9999px;
-        font-size: 32px;
-        font-weight: 700;
-        line-height: 1.4;
-        margin-bottom: 30px;
-        backdrop-filter: blur(12px);
       }
-
-      .pill-danger {
-        background: rgba(239, 68, 68, 0.15);
-        border: 2px solid rgba(239, 68, 68, 0.5);
-        color: #fca5a5;
+      .b-red {
+        background: rgba(255, 107, 107, 0.15);
+        border-color: rgba(255, 107, 107, 0.45);
+        color: #ffb0b0;
       }
-
-      .pill-success {
-        background: rgba(16, 185, 129, 0.15);
-        border: 2px solid rgba(16, 185, 129, 0.5);
-        color: #6ee7b7;
+      .b-yel {
+        background: rgba(251, 191, 36, 0.15);
+        border-color: rgba(251, 191, 36, 0.45);
+        color: #fcd34d;
       }
-
-      .pill-warning {
-        background: rgba(245, 158, 11, 0.15);
-        border: 2px solid rgba(245, 158, 11, 0.5);
-        color: #fde68a;
+      .b-grn {
+        background: rgba(47, 224, 160, 0.15);
+        border-color: rgba(47, 224, 160, 0.45);
+        color: #6ff0c0;
       }
-
-      /* Typography */
-      h1.headline {
-        font-size: 64px;
-        font-weight: 700;
-        line-height: 1.35;
-        letter-spacing: -0.01em;
-        margin-bottom: 24px;
-        color: #ffffff;
-      }
-
-      .subtext {
-        font-size: 38px;
-        font-weight: 500;
-        line-height: 1.45;
-        color: var(--text-secondary);
-        max-width: 900px;
-      }
-
-      .highlight-red {
-        color: #f87171;
-      }
-
-      .highlight-emerald {
-        color: #34d399;
-      }
-
-      /* UI Mockup Card Containers */
-      .mockup-container {
-        position: relative;
-        width: 920px;
-        height: 600px;
-        border-radius: 28px;
-        overflow: hidden;
-        box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8),
-                    0 0 0 1px rgba(255, 255, 255, 0.1);
-        background: #1e293b;
-        margin-top: 30px;
-      }
-
-      .mockup-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: top center;
-      }
-
-      /* Floating Feature Callout */
-      .callout-card {
-        position: absolute;
-        bottom: -20px;
-        background: rgba(15, 23, 42, 0.95);
-        border: 2px solid rgba(16, 185, 129, 0.5);
-        border-radius: 20px;
-        padding: 18px 36px;
+      /* Logo Lockup */
+      .logo {
         display: flex;
         align-items: center;
-        gap: 16px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        font-size: 32px;
+        gap: 18px;
+        font-size: 58px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -1px;
+      }
+      .logo i {
+        width: 84px;
+        height: 84px;
+        border-radius: 22px;
+        background: #10b981;
+        display: grid;
+        place-items: center;
+        font-style: normal;
+        font-size: 60px;
+        color: #ffffff;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
+      }
+      .logo small {
+        font-size: 26px;
+        border: 1.5px solid #2fe0a0;
+        color: #2fe0a0;
+        border-radius: 12px;
+        padding: 4px 14px;
+        letter-spacing: 0.5px;
+      }
+      /* Scene 1: Queue & Loading Bar */
+      .queue {
+        display: flex;
+        gap: 14px;
+        font-size: 64px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 860px;
+      }
+      .load {
+        width: 620px;
+        height: 24px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+        position: relative;
+      }
+      .load b {
+        display: block;
+        height: 100%;
+        width: 38%;
+        background: #ff6b6b;
+        border-radius: 999px;
+        box-shadow: 0 0 20px #ff6b6b;
+      }
+      /* Scene 4: POS Checklist Card */
+      .card {
+        width: 780px;
+        background: #ffffff;
+        color: #12263a;
+        border-radius: 32px;
+        padding: 40px;
+        text-align: left;
+        font-size: 34px;
+        font-weight: 700;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      }
+      .card div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1.5px solid #e3e9ef;
+      }
+      .card .ok {
+        color: #059669;
+        font-weight: 800;
+        border-bottom: 0;
+      }
+      .check {
+        font-size: 38px;
+        color: #10b981;
+        font-weight: 900;
+      }
+      /* Status Chip */
+      .chip {
+        background: #0b1220;
+        border: 2px solid #2fe0a0;
+        border-radius: 999px;
+        padding: 22px 42px;
+        font-size: 34px;
         font-weight: 700;
         color: #ffffff;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
       }
-
-      /* CTA Pulse Button */
-      .cta-pill {
-        display: inline-block;
-        padding: 24px 56px;
-        border-radius: 9999px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      .chip.r {
+        border-color: #ff6b6b;
+        background: rgba(255, 107, 107, 0.1);
+        color: #fecaca;
+      }
+      /* Scene 6: CTA Button & Outro */
+      .cta {
+        background: linear-gradient(90deg, #10b981, #059669);
+        border-radius: 999px;
+        padding: 30px 60px;
+        font-size: 44px;
+        font-weight: 800;
         color: #ffffff;
-        font-size: 42px;
-        font-weight: 700;
-        line-height: 1.4;
-        box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
-        margin-top: 36px;
-        border: none;
+        box-shadow: 0 0 50px rgba(16, 185, 129, 0.55);
       }
-
-      .cta-sub {
-        margin-top: 18px;
-        font-size: 28px;
+      .tiny {
+        font-size: 30px;
         color: #94a3b8;
         font-weight: 600;
       }
-
-      .brand-url {
-        margin-top: 30px;
-        font-family: var(--font-display);
-        font-size: 26px;
-        letter-spacing: 0.05em;
-        color: #64748b;
-        font-weight: 600;
+      /* Bottom Live Subtitle / Caption Pill */
+      .cap {
+        position: absolute;
+        left: 60px;
+        right: 60px;
+        bottom: 80px;
+        background: rgba(0, 0, 0, 0.78);
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        border-radius: 28px;
+        padding: 24px 34px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 1.45;
+        color: #ffffff;
+        z-index: 40;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(16px);
       }
     </style>
   </head>
   <body>
     <div
-      id="root"
+      class="stage"
       data-composition-id="main"
       data-start="0"
       data-duration="30"
       data-width="1080"
       data-height="1920"
+      data-fps="30"
     >
-      <div class="grid-pattern"></div>
+      <!-- Top Progress Timeline Bar -->
+      <div class="bar" id="bar"></div>
 
-      <!-- Master Audio Track -->
+      <!-- Synchronized Master Voiceover Audio -->
       <audio
         id="voiceover"
         src="./assets/voiceover.mp3"
@@ -224,134 +271,96 @@
       ></audio>
 
       <!-- ============================================================ -->
-      <!-- SCENE 1 (0.0s – 3.0s): The Hook (Evening Counter Emergency) -->
+      <!-- SCENE 1 (0.0s – 4.6s): The Hook (Counter Screen Hang)       -->
       <!-- ============================================================ -->
       <div id="scene1" class="scene">
-        <div class="pill pill-danger">
-          <span>⏰ রাত ৮:১৫</span>
-          <span>•</span>
-          <span>১০ জন কাস্টমার সিরিয়ালে</span>
-        </div>
-        <h1 class="headline">
+        <div class="badge b-red">⏰ রাত ৮:১৫ • ১০ জন কাস্টমার সিরিয়ালে</div>
+        <div class="h">
           রাত ৮:১৫। ১০ জন সিরিয়ালে।<br />
-          <span class="highlight-red">বিলিং স্ক্রিন হ্যাং!</span>
-        </h1>
-        <p class="subtext">
-          কাউন্টারে রোগীর লাইন অথচ সফটওয়্যার আটকে লোডিং?
-        </p>
+          <span class="red">বিলিং স্ক্রিন হ্যাং!</span>
+        </div>
+        <div class="queue" id="queue">
+          <span>🧍</span><span>🧍</span><span>🧍</span><span>🧍</span><span>🧍</span>
+          <span>🧍</span><span>🧍</span><span>🧍</span><span>🧍</span><span>🧍</span>
+        </div>
+        <div class="load"><b id="load-bar"></b></div>
+        <div class="s">কাউন্টারে রোগীর লাইন অথচ সফটওয়্যার আটকে লোডিং?</div>
       </div>
 
       <!-- ============================================================ -->
-      <!-- SCENE 2 (3.0s – 9.0s): The Silent Cost (Tabs & Expiry Loss)  -->
+      <!-- SCENE 2 (4.6s – 9.5s): The Silent Cost (Customer & Stock Loss)-->
       <!-- ============================================================ -->
       <div id="scene2" class="scene">
-        <div class="pill pill-warning">
-          <span>⚠️ এক্সপায়ার্ড ব্যাচ — লাভ লস</span>
+        <div class="badge b-yel">⚠️ এক্সপায়ার্ড ব্যাচ — লাভ লস</div>
+        <div class="h">
+          ট্যাবের ঝামেলায় কাস্টমার লস।<br />
+          <span class="red">এক্সপায়ার্ড স্টকে লাভ লস।</span>
         </div>
-        <h1 class="headline">
-          ট্যাবের ঝামেলায় কাস্টমার লস।<br />
-          <span class="highlight-red">এক্সপায়ার্ড স্টকে লাভ লস।</span>
-        </h1>
-        <p class="subtext">
-          অগোছালো সার্চে কাস্টমার চলে যায়—আর মেয়াদোত্তীর্ণ ওষুধে প্রতি মাসে নিঃশব্দে গচ্চা যায় হাজার হাজার টাকা!
-        </p>
+        <div class="s">
+          অগোছালো সার্চে কাস্টমার চলে যায়—আর মেয়াদোত্তীর্ণ ওষুধে প্রতি মাসে নিঃশব্দে গচ্চা যায় হাজার হাজার টাকা!
+        </div>
       </div>
 
       <!-- ============================================================ -->
-      <!-- SCENE 3 (9.0s – 13.0s): The Turning Point (Meet Aidly PMS)   -->
+      <!-- SCENE 3 (9.5s – 13.5s): The Turning Point (Meet Aidly PMS)   -->
       <!-- ============================================================ -->
       <div id="scene3" class="scene">
-        <img
-          id="logo-scene3"
-          src="./assets/aidly-logo.svg"
-          data-start="9.5"
-          data-duration="4"
-          alt="Aidly PMS Logo"
-          style="width: 380px; height: auto; margin-bottom: 30px;"
-        />
-        <div class="pill pill-success">
-          <span>✨ পিক আওয়ারে নো টেনশন</span>
-        </div>
-        <h1 class="headline">
-          সমাধান: <span class="highlight-emerald">Aidly PMS</span>
-        </h1>
-        <p class="subtext">
-          পিক আওয়ারের ভিড়ে আপনার ফার্মেসি কাউন্টার আর আটকাবে না।
-        </p>
+        <div class="logo"><i>✚</i>Aidly <small>PMS</small></div>
+        <div class="badge b-grn">✨ পিক আওয়ারে নো টেনশন</div>
+        <div class="h">সমাধান: <span class="grn">Aidly PMS</span></div>
+        <div class="s">পিক আওয়ারের ভিড়ে আপনার ফার্মেসি কাউন্টার আর আটকাবে না।</div>
       </div>
 
       <!-- ============================================================ -->
-      <!-- SCENE 4 (13.0s – 20.0s): Demo Fast POS (3-Sec Billing)      -->
+      <!-- SCENE 4 (13.5s – 18.5s): Fast POS (3-Sec Billing & Receipt)  -->
       <!-- ============================================================ -->
       <div id="scene4" class="scene">
-        <div class="pill pill-success">
-          <span>⚡ ৩ সেকেন্ডে বিলিং</span>
+        <div class="badge b-grn">⚡ ৩ সেকেন্ডে বিলিং</div>
+        <div class="h">
+          মাল্টি-স্ক্রিন POS • <span class="grn">সুপারফাস্ট চেকআউট</span>
         </div>
-        <h1 class="headline" style="font-size: 54px; margin-bottom: 12px;">
-          মাল্টি-স্ক্রিন POS • <span class="highlight-emerald">সুপারফাস্ট চেকআউট</span>
-        </h1>
-        <p class="subtext" style="font-size: 32px;">
-          ওষুধ সার্চ, জেনেরিক চেক আর রিসিট প্রিন্ট—সব হবে মাত্র কয়েক সেকেন্ডে!
-        </p>
-        <div class="mockup-container">
-          <img src="./assets/pos-checkout.png" class="mockup-img" alt="POS Checkout" />
-          <div class="callout-card" style="left: 40px; bottom: 30px;">
-            <span>⚡ ইনস্ট্যান্ট বারকোড ও থার্মাল প্রিন্ট</span>
-          </div>
+        <div class="s">
+          ওষুধ সার্চ, জেনেরিক চেক আর রিসিট প্রিন্ট—সব হবে মাত্র কয়েক সেকেন্ডে!
         </div>
+        <div class="card" id="card">
+          <div><span>🔎 ওষুধ সার্চ</span><span class="check">✓</span></div>
+          <div><span>💊 জেনেরিক চেক</span><span class="check">✓</span></div>
+          <div class="ok"><span>🧾 রিসিট প্রিন্ট</span><span class="check">✓</span></div>
+        </div>
+        <div class="chip">⚡ ইনস্ট্যান্ট বারকোড ও থার্মাল প্রিন্ট</div>
       </div>
 
       <!-- ============================================================ -->
-      <!-- SCENE 5 (20.0s – 25.0s): Demo Expiry Alert (FEFO Protection)-->
+      <!-- SCENE 5 (18.5s – 22.8s): Expiry Alert (FEFO Protection)      -->
       <!-- ============================================================ -->
       <div id="scene5" class="scene">
-        <div class="pill pill-danger" style="border-color: #10b981; background: rgba(16, 185, 129, 0.15); color: #34d399;">
-          <span>🛡️ অটো এক্সপায়ারি অ্যালার্ট</span>
+        <div class="badge b-grn">🛡️ অটো এক্সপায়ারি অ্যালার্ট</div>
+        <div class="h">
+          আগেভাগেই সতর্কতা • <span class="grn">১ টাকাও লস নয়</span>
         </div>
-        <h1 class="headline" style="font-size: 54px; margin-bottom: 12px;">
-          আগেভাগেই সতর্কতা • <span class="highlight-emerald">১ টাকাও লস নয়</span>
-        </h1>
-        <p class="subtext" style="font-size: 32px;">
-          অটো ব্যাচ অ্যালার্ট আগেই জানাবে কোন ওষুধের মেয়াদ শেষ হতে ৩০ দিন বাকি।
-        </p>
-        <div class="mockup-container">
-          <img src="./assets/expiry-alerts.png" class="mockup-img" alt="Expiry Alerts" />
-          <div class="callout-card" style="left: 40px; bottom: 30px; border-color: #ef4444;">
-            <span>🔔 মেয়াদ শেষ হতে ৩০ দিন বাকি — অটো নোটিফিকেশন</span>
-          </div>
+        <div class="s">
+          অটো ব্যাচ অ্যালার্ট আগেই জানাবে কোন ওষুধের মেয়াদ শেষ হতে ৩০ দিন বাকি।
         </div>
+        <div class="chip r">🔔 মেয়াদ শেষ হতে ৩০ দিন বাকি — অটো নোটিফিকেশন</div>
       </div>
 
       <!-- ============================================================ -->
-      <!-- SCENE 6 (25.0s – 30.0s): Payoff & Call to Action             -->
+      <!-- SCENE 6 (22.8s – 30.0s): Payoff & Call to Action             -->
       <!-- ============================================================ -->
       <div id="scene6" class="scene">
-        <img
-          id="logo-scene6"
-          src="./assets/aidly-logo.png"
-          data-start="22.8"
-          data-duration="7.2"
-          alt="Aidly PMS"
-          style="width: 320px; height: auto; margin-bottom: 24px;"
-        />
-        <h1 class="headline">
+        <div class="logo"><i>✚</i>Aidly <small>PMS</small></div>
+        <div class="h">
           ফাস্ট কাউন্টার।<br />
-          <span class="highlight-emerald">ক্লিয়ার হিসাব।</span>
-        </h1>
-        <p class="subtext">
-          লাইন এগোবে দ্রুত, হিসাব থাকবে নির্ভুল।
-        </p>
-
-        <div class="cta-pill">
-          ফ্রি ডেমোর জন্য কমেন্ট করুন "AIDLY"
+          <span class="grn">ক্লিয়ার হিসাব।</span>
         </div>
-        <div class="cta-sub">
-          💬 অথবা সরাসরি ইনবক্স করুন আমাদের পেইজে
-        </div>
-        <div class="brand-url">
-          🌐 infoaidtech.net • Info AidTech
-        </div>
+        <div class="s">লাইন এগোবে দ্রুত, হিসাব থাকবে নির্ভুল।</div>
+        <div class="cta" id="cta-btn">ফ্রি ডেমোর জন্য কমেন্ট করুন “AIDLY”</div>
+        <div class="tiny">💬 অথবা সরাসরি ইনবক্স করুন আমাদের পেইজে</div>
+        <div class="tiny">🌐 infoaidtech.net • Info AidTech</div>
       </div>
+
+      <!-- Synchronized On-Screen Caption Bar -->
+      <div class="cap" id="cap">রাত আটটা পনেরো। দশজন কাস্টমার সিরিয়ালে। বিলিং স্ক্রিন হ্যাং!</div>
     </div>
 
     <!-- GSAP Kinetic Timeline Script -->
@@ -359,32 +368,56 @@
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
 
-      // Helper for clean cross-fades
-      // Scene 1: 0.0s - 4.6s (Hook)
-      tl.fromTo("#scene1", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }, 0.0);
-      tl.to("#scene1", { opacity: 0, scale: 1.04, duration: 0.35, ease: "power2.in" }, 4.25);
+      // 1. Top Progress Bar
+      tl.to("#bar", { width: "100%", duration: 30.0, ease: "none" }, 0.0);
 
-      // Scene 2: 4.6s - 9.5s (The Silent Cost)
-      tl.fromTo("#scene2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 4.6);
-      tl.to("#scene2", { opacity: 0, scale: 0.98, duration: 0.35, ease: "power2.in" }, 9.15);
+      // 2. Synchronized Live Caption Updates
+      tl.call(() => {
+        document.getElementById("cap").textContent = "রাত আটটা পনেরো। দশজন কাস্টমার সিরিয়ালে। বিলিং স্ক্রিন হ্যাং!";
+      }, null, 0.0);
+      tl.call(() => {
+        document.getElementById("cap").textContent = "ট্যাবের ঝামেলায় কাস্টমার ফেরত, আর এক্সপায়ার্ড স্টকে লস হয় আপনার লাভ।";
+      }, null, 4.6);
+      tl.call(() => {
+        document.getElementById("cap").textContent = "পিক আওয়ারে আর কোনো টেনশন নয়। নিয়ে আসুন Aidly PMS।";
+      }, null, 9.5);
+      tl.call(() => {
+        document.getElementById("cap").textContent = "ক্লিন POS-এ ওষুধ সার্চ, জেনেরিক চেক আর ৩ সেকেন্ডে দ্রুত ক্যাশ মেমো।";
+      }, null, 13.5);
+      tl.call(() => {
+        document.getElementById("cap").textContent = "অটো ব্যাচ অ্যালার্ট আগেভাগেই জানাবে এক্সপায়ারি—১ টাকাও লস নয়।";
+      }, null, 18.5);
+      tl.call(() => {
+        document.getElementById("cap").textContent = "লাইন এগোবে দ্রুত, হিসাব থাকবে ক্লিয়ার। ফ্রি ডেমোর জন্য কমেন্ট করুন AIDLY!";
+      }, null, 22.8);
 
-      // Scene 3: 9.5s - 13.5s (Turning Point: Meet Aidly PMS)
-      tl.fromTo("#scene3", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.4)" }, 9.5);
+      // 3. Scene 1: 0.0s – 4.6s (Hook)
+      tl.fromTo("#scene1", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, 0.0);
+      tl.from("#queue span", { opacity: 0, y: 30, stagger: 0.12, duration: 0.35, ease: "back.out(1.5)" }, 0.2);
+      tl.fromTo("#load-bar", { xPercent: -100 }, { xPercent: 180, repeat: 4, duration: 0.9, ease: "linear" }, 0.4);
+      tl.to("#scene1", { opacity: 0, scale: 1.03, duration: 0.3, ease: "power2.in" }, 4.3);
+
+      // 4. Scene 2: 4.6s – 9.5s (The Silent Cost)
+      tl.fromTo("#scene2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 4.6);
+      tl.to("#scene2", { opacity: 0, scale: 0.98, duration: 0.3, ease: "power2.in" }, 9.2);
+
+      // 5. Scene 3: 9.5s – 13.5s (Turning Point: Meet Aidly PMS)
+      tl.fromTo("#scene3", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(1.4)" }, 9.5);
       tl.to("#scene3", { opacity: 0, duration: 0.3, ease: "power2.in" }, 13.2);
 
-      // Scene 4: 13.5s - 18.5s (POS Billing Demo)
+      // 6. Scene 4: 13.5s – 18.5s (POS Billing Demo)
       tl.fromTo("#scene4", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 13.5);
-      tl.fromTo("#scene4 .mockup-container", { scale: 0.92, opacity: 0.8 }, { scale: 1, opacity: 1, duration: 4.8, ease: "none" }, 13.7);
-      tl.to("#scene4", { opacity: 0, duration: 0.35, ease: "power2.in" }, 18.15);
+      tl.from("#card div", { opacity: 0, x: -30, stagger: 0.35, duration: 0.4, ease: "power2.out" }, 14.1);
+      tl.to("#scene4", { opacity: 0, duration: 0.3, ease: "power2.in" }, 18.2);
 
-      // Scene 5: 18.5s - 22.8s (Expiry Alert Demo)
+      // 7. Scene 5: 18.5s – 22.8s (Expiry Alert Demo)
       tl.fromTo("#scene5", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 18.5);
-      tl.fromTo("#scene5 .mockup-container", { scale: 0.94 }, { scale: 1, duration: 4.0, ease: "none" }, 18.7);
-      tl.to("#scene5", { opacity: 0, duration: 0.35, ease: "power2.in" }, 22.45);
+      tl.fromTo("#scene5 .chip", { scale: 0.9 }, { scale: 1.05, repeat: 4, yoyo: true, duration: 0.8, ease: "sine.inOut" }, 19.0);
+      tl.to("#scene5", { opacity: 0, duration: 0.3, ease: "power2.in" }, 22.5);
 
-      // Scene 6: 22.8s - 30.0s (Payoff & CTA)
+      // 8. Scene 6: 22.8s – 30.0s (Payoff & CTA)
       tl.fromTo("#scene6", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 22.8);
-      tl.fromTo("#scene6 .cta-pill", { scale: 0.95 }, { scale: 1.05, repeat: 7, yoyo: true, duration: 0.8, ease: "sine.inOut" }, 23.3);
+      tl.fromTo("#cta-btn", { scale: 0.96 }, { scale: 1.05, repeat: 6, yoyo: true, duration: 0.7, ease: "sine.inOut" }, 23.3);
 
       window.__timelines["main"] = tl;
       tl.seek(0);
