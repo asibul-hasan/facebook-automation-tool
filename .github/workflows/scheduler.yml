@@ -2,10 +2,10 @@ name: Facebook Page Post Scheduler
 
 on:
   schedule:
-    # Run 1: Post 1 (12:00 PM BST / 06:00 UTC) - Agency Marketing
-    - cron: '0 6 * * *'
-    # Run 2: Post 2 (08:30 PM BST / 14:30 UTC) - Aidly PMS (Banners & Bengali Videos)
-    - cron: '30 14 * * *'
+    # Launch Run: Today Nov 21, 2026 at 03:00 PM BST (09:00 UTC) - Aidly PMS 3D Story
+    - cron: '0 9 * * *'
+    # Daily Recurring Cadence: Every Day at 11:00 AM BST (05:00 UTC) - Alternating Queue
+    - cron: '0 5 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions web UI
 
 # Required permissions to commit and push changes back to the repository
@@ -38,7 +38,16 @@ jobs:
           BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
           IG_ACCOUNT_ID: ${{ secrets.IG_ACCOUNT_ID }}
-        run: python post_to_fb.py
+        run: |
+          CURRENT_HOUR_UTC=$(date -u +'%H')
+          CURRENT_DATE=$(date -u +'%Y-%m-%d')
+          echo "Current UTC Hour: $CURRENT_HOUR_UTC | Current UTC Date: $CURRENT_DATE"
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && { [ "$CURRENT_HOUR_UTC" = "09" ] || [ "$CURRENT_HOUR_UTC" = "08" ] || [ "$CURRENT_HOUR_UTC" = "10" ]; } && [ "$CURRENT_DATE" != "2026-11-21" ]; then
+            echo "Notice: 09:00 UTC (3:00 PM BST) slot was configured for launch date 2026-11-21 only."
+            echo "Regular recurring schedule runs daily at 05:00 UTC (11:00 AM BST). Skipping execution."
+            exit 0
+          fi
+          python post_to_fb.py
 
       - name: Commit and push updated posts queue
         run: |
