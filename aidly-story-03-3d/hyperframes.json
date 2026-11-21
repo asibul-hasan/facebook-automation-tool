@@ -1,0 +1,9 @@
+{
+  "name": "aidly-story-03-3d",
+  "version": "1.0.0",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "duration": 30,
+  "outDir": "./"
+}

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aidly PMS – 3D Animated Pharmacy Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #060911;
+        font-family: "Noto Sans Bengali", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        color: #ffffff;
+        -webkit-font-smoothing: antialiased;
+      }
+      .stage {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+      }
+      #webgl-canvas {
+        position: absolute;
+        inset: 0;
+        width: 1080px;
+        height: 1920px;
+        display: block;
+        z-index: 1;
+      }
+      /* Subtle Vignette */
+      .vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(5, 8, 16, 0.75) 100%),
+          linear-gradient(180deg, rgba(6, 9, 17, 0.75) 0%, transparent 18%, transparent 78%, rgba(6, 9, 17, 0.95) 100%);
+      }
+      /* Top Progress Bar */
+      .progress-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 12px;
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        width: 0%;
+        z-index: 20;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+      }
+      /* Top Header */
+      .top-header {
+        position: absolute;
+        top: 44px;
+        left: 50px;
+        right: 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 20;
+      }
+      .brand-pill {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(15, 23, 42, 0.88);
+        border: 1.5px solid rgba(16, 185, 129, 0.4);
+        border-radius: 999px;
+        padding: 10px 24px;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      }
+      .brand-pill img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+      }
+      .brand-pill .title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #ffffff;
+      }
+      .brand-pill .tag {
+        font-size: 16px;
+        background: #10b981;
+        color: #060911;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-weight: 800;
+      }
+      .clock-pill {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(15, 23, 42, 0.88);
+        border: 1.5px solid rgba(239, 68, 68, 0.45);
+        border-radius: 999px;
+        padding: 10px 22px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #fca5a5;
+        backdrop-filter: blur(16px);
+      }
+      .clock-pill.ok {
+        border-color: rgba(16, 185, 129, 0.45);
+        color: #6ee7b7;
+      }
+      /* HUD Scenes Overlay */
+      .hud-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        pointer-events: none;
+      }
+      .hud-scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 130px;
+        text-align: center;
+        opacity: 0;
+      }
+      /* Badges */
+      .badge {
+        font-size: 28px;
+        font-weight: 800;
+        border-radius: 999px;
+        padding: 12px 34px;
+        border: 2px solid;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        margin-bottom: 16px;
+      }
+      .b-red {
+        background: rgba(239, 68, 68, 0.18);
+        border-color: rgba(239, 68, 68, 0.7);
+        color: #fca5a5;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.35);
+      }
+      .b-yel {
+        background: rgba(245, 158, 11, 0.18);
+        border-color: rgba(245, 158, 11, 0.7);
+        color: #fde68a;
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+      }
+      .b-grn {
+        background: rgba(16, 185, 129, 0.18);
+        border-color: rgba(16, 185, 129, 0.75);
+        color: #6ee7b7;
+        box-shadow: 0 0 35px rgba(16, 185, 129, 0.35);
+      }
+      .h-main {
+        font-size: 56px;
+        font-weight: 900;
+        line-height: 1.28;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
+        max-width: 950px;
+      }
+      .h-sub {
+        font-size: 28px;
+        color: #cbd5e1;
+        line-height: 1.4;
+        margin-top: 12px;
+        max-width: 860px;
+        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+      }
+      .highlight-red {
+        color: #f87171;
+      }
+      .highlight-grn {
+        color: #34d399;
+      }
+      /* Glass Floating Feature Pill in Scene 4 & 5 */
+      .glass-features {
+        position: absolute;
+        bottom: 210px;
+        left: 50px;
+        right: 50px;
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+      .feature-chip {
+        background: rgba(15, 23, 42, 0.88);
+        border: 1.5px solid rgba(16, 185, 129, 0.45);
+        border-radius: 20px;
+        padding: 14px 22px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #e2e8f0;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .feature-chip span {
+        color: #34d399;
+      }
+      /* Scene 6 Hero Call to Action Container */
+      .cta-container {
+        position: absolute;
+        bottom: 200px;
+        left: 50px;
+        right: 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+      .cta-box {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        font-size: 36px;
+        font-weight: 900;
+        border-radius: 999px;
+        padding: 22px 54px;
+        box-shadow: 0 16px 45px rgba(16, 185, 129, 0.6);
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .contact-card {
+        background: rgba(15, 23, 42, 0.88);
+        border: 1.5px solid rgba(16, 185, 129, 0.35);
+        border-radius: 20px;
+        padding: 16px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 24px;
+        font-weight: 700;
+        color: #94a3b8;
+        backdrop-filter: blur(16px);
+      }
+      .contact-card span {
+        color: #ffffff;
+      }
+      /* Live Subtitle Pill at Bottom */
+      .subtitle-pill {
+        position: absolute;
+        bottom: 60px;
+        left: 50px;
+        right: 50px;
+        background: rgba(10, 15, 24, 0.94);
+        border: 2px solid rgba(16, 185, 129, 0.5);
+        border-radius: 30px;
+        padding: 22px 34px;
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.45;
+        text-align: center;
+        color: #ffffff;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.25);
+        z-index: 25;
+      }
+      .subtitle-pill .hl {
+        color: #fde047;
+      }
+      /* Offscreen Canvas for Ultra-Crisp 3D Monitor Texture */
+      #offscreen-pos-canvas {
+        display: none;
+      }
+    </style>
+  </head>
+  <body data-composition-id="main" data-width="1080" data-height="1920" data-fps="30" data-duration="30">
+    <!-- Local Master Audio Track (ElevenLabs Rakib Voiceover + Mixed SFX) -->
+    <audio id="voiceover" src="./assets/voiceover.mp3" data-start="0" data-duration="30"></audio>
+
+    <div class="stage">
+      <!-- Top Progress Bar -->
+      <div class="progress-bar" id="progress-bar"></div>
+
+      <!-- Top Header -->
+      <div class="top-header">
+        <div class="brand-pill">
+          <img src="./assets/aidly-logo.png" alt="Aidly Logo" />
+          <span class="title">Aidly <span style="color: #10b981">PMS</span></span>
+          <span class="tag">ঢাকা স্পেশাল</span>
+        </div>
+        <div class="clock-pill" id="clock-pill">
+          <span>⏰</span> <span id="clock-text">২০:১৫ (পিক আওয়ার)</span>
+        </div>
+      </div>
+
+      <!-- 3D Three.js WebGL Rendering Canvas -->
+      <canvas id="webgl-canvas"></canvas>
+      <div class="vignette"></div>
+
+      <!-- 2D/3D Kinetic HUD Layer -->
+      <div class="hud-layer">
+        <!-- Scene 1: 0.0s – 4.6s (Hook: Frozen Screen) -->
+        <div class="hud-scene" id="hud-s1">
+          <div class="badge b-red">⚠️ কাউন্টারে ১০ জন কাস্টমার • স্ক্রিন হ্যাং!</div>
+          <div class="h-main">
+            রাত ৮টা ১৫।<br />
+            <span class="highlight-red">বিলিং স্ক্রিন হ্যাং!</span>
+          </div>
+          <div class="h-sub">পিক আওয়ারে ল্যাগ মানেই কাস্টমার লস ও বিলিং জট।</div>
+        </div>
+
+        <!-- Scene 2: 4.6s – 9.5s (The Silent Cost: Expired Medicine & Profit Loss) -->
+        <div class="hud-scene" id="hud-s2">
+          <div class="badge b-yel">📉 প্রতি মাসে ৳২৫,০০০+ নীরব লোকসান</div>
+          <div class="h-main">
+            ট্যাবের ঝামেলায় কাস্টমার শেষ,<br />
+            <span class="highlight-red">মেয়াদোত্তীর্ণ স্টকে লাভ শেষ!</span>
+          </div>
+          <div class="h-sub">অগোছালো জেনেরিক আর মেয়াদ শেষ হওয়া ওষুধের নীরব ক্ষতি।</div>
+        </div>
+
+        <!-- Scene 3: 9.5s – 13.5s (The Turning Point: Aidly PMS Shield) -->
+        <div class="hud-scene" id="hud-s3">
+          <div class="badge b-grn">✨ স্মার্ট ক্লাউড সমাধান</div>
+          <div class="h-main">
+            পিক আওয়ারে নো টেনশন!<br />
+            নিয়ে আসুন <span class="highlight-grn">Aidly PMS</span>
+          </div>
+          <div class="h-sub">ফার্মেসির ড্রাগ ইনভেন্টরি ও সুপারফাস্ট পিওএস বিলিং।</div>
+        </div>
+
+        <!-- Scene 4: 13.5s – 18.5s (Demo: Multi-Screen POS & 3s Fast Billing) -->
+        <div class="hud-scene" id="hud-s4">
+          <div class="badge b-grn">⚡ ৩ সেকেন্ডে সুপারফাস্ট বিলিং</div>
+          <div class="h-main">
+            মাল্টি-স্ক্রিন POS • <span class="highlight-grn">ইনস্ট্যান্ট সার্চ</span>
+          </div>
+          <div class="h-sub">ওষুধ সার্চ, জেনেরিক ড্রাগ চেক আর ইনস্ট্যান্ট ক্যাশ মেমো।</div>
+          <div class="glass-features">
+            <div class="feature-chip"><span>⚡</span> Napa ➔ Paracetamol</div>
+            <div class="feature-chip"><span>✓</span> ০.২ সেকেন্ডে স্ক্যান</div>
+            <div class="feature-chip"><span>🧾</span> মেমো প্রিন্ট রেডি</div>
+          </div>
+        </div>
+
+        <!-- Scene 5: 18.5s – 22.8s (Demo: Auto Expiry Alert & FEFO Protection) -->
+        <div class="hud-scene" id="hud-s5">
+          <div class="badge b-grn">🛡️ ১০০% লোকসান রোধ • ০ টাকা লস</div>
+          <div class="h-main">
+            অটো ব্যাচ অ্যালার্ট • <span class="highlight-grn">FEFO মেথড</span>
+          </div>
+          <div class="h-sub">মেয়াদ শেষ হওয়ার ৩০ দিন আগেই অটো অ্যালার্ট ও রিটার্ন শিট।</div>
+          <div class="glass-features">
+            <div class="feature-chip" style="border-color: rgba(245, 158, 11, 0.6)"><span>⚠️</span> ৩০ দিন আগে অ্যালার্ট</div>
+            <div class="feature-chip"><span>📦</span> FEFO ড্রাগ ট্র্যাকিং</div>
+            <div class="feature-chip"><span>৳</span> ০% লোকসান গ্যারান্টি</div>
+          </div>
+        </div>
+
+        <!-- Scene 6: 22.8s – 30.0s (Payoff & Call To Action) -->
+        <div class="hud-scene" id="hud-s6">
+          <div class="badge b-grn">🌟 সারা বাংলাদেশের ফার্মেসির আস্থা</div>
+          <div class="h-main">
+            ফাস্ট কাউন্টার।<br />
+            <span class="highlight-grn">ক্লিয়ার হিসাব।</span>
+          </div>
+          <div class="cta-container">
+            <div class="cta-box" id="cta-button">
+              <span>🎁 ফ্রি ডেমোর জন্য কমেন্ট করুন “AIDLY”</span>
+            </div>
+            <div class="contact-card">
+              <div>💬 <span>ইনবক্স করুন আমাদের পেইজে (Facebook & LinkedIn)</span></div>
+              <div>🌐 <span>infoaidtech.net</span> • Info AidTech</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Synchronized Subtitle Pill -->
+      <div class="subtitle-pill" id="subtitle">
+        রাত ৮টা ১৫। কাউন্টারে ১০ জন কাস্টমার—ঠিক তখনই <span class="hl">বিলিং স্ক্রিন হ্যাং!</span>
+      </div>
+    </div>
+
+    <!-- Hidden Offscreen Canvas for Dynamic 3D POS Monitor Screen Texture (1024x768 High Res) -->
+    <canvas id="offscreen-pos-canvas" width="1024" height="768"></canvas>
+
+    <!-- 3D Three.js WebGL & GSAP Engine Script -->
+    <script>
+      // Seeded PRNG for 100% deterministic rendering across all frames
+      function mulberry32(a) {
+        return function () {
+          let t = (a += 0x6d2b79f5);
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      const rnd = mulberry32(1337);
+
+      // ==========================================
+      // 1. THREE.JS SCENE SETUP
+      // ==========================================
+      const canvas = document.getElementById("webgl-canvas");
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setSize(1080, 1920);
+      renderer.setPixelRatio(1);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x060911, 0.038);
+
+      const camera = new THREE.PerspectiveCamera(40, 1080 / 1920, 0.1, 1000);
+      camera.position.set(0, 3.8, 8.5);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0x0f172a, 1.4);
+      scene.add(ambientLight);
+
+      const mainLight = new THREE.DirectionalLight(0xffffff, 2.0);
+      mainLight.position.set(6, 14, 8);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 1024;
+      mainLight.shadow.mapSize.height = 1024;
+      scene.add(mainLight);
+
+      const redAlarmLight = new THREE.PointLight(0xef4444, 3.5, 18);
+      redAlarmLight.position.set(0, 3, 2);
+      scene.add(redAlarmLight);
+
+      const greenTechLight = new THREE.PointLight(0x10b981, 0, 20);
+      greenTechLight.position.set(0, 3.5, 2);
+      scene.add(greenTechLight);
+
+      const cyanRimLight = new THREE.PointLight(0x06b6d4, 2.0, 15);
+      cyanRimLight.position.set(-5, 6, -2);
+      scene.add(cyanRimLight);
+
+      // ==========================================
+      // 2. DYNAMIC 3D POS SCREEN CANVAS TEXTURE (1024x768)
+      // ==========================================
+      const posCanvas = document.getElementById("offscreen-pos-canvas");
+      const pctx = posCanvas.getContext("2d");
+      const posTexture = new THREE.CanvasTexture(posCanvas);
+      posTexture.minFilter = THREE.LinearFilter;
+
+      function updatePosScreen(mode, glitchIntensity = 0) {
+        pctx.fillStyle = mode === "error" ? "#1e1014" : "#0f172a";
+        pctx.fillRect(0, 0, 1024, 768);
+
+        if (mode === "error") {
+          // Red Header
+          pctx.fillStyle = "#ef4444";
+          pctx.fillRect(0, 0, 1024, 90);
+          pctx.fillStyle = "#ffffff";
+          pctx.font = "bold 38px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("PHARMACY POS - SYSTEM HALTED", 40, 60);
+
+          // Error Message Box
+          pctx.fillStyle = "rgba(239, 68, 68, 0.2)";
+          pctx.fillRect(80, 160, 864, 460);
+          pctx.strokeStyle = "#ef4444";
+          pctx.lineWidth = 4;
+          pctx.strokeRect(80, 160, 864, 460);
+
+          pctx.fillStyle = "#fca5a5";
+          pctx.font = "bold 64px 'Noto Sans Bengali', sans-serif";
+          pctx.fillText("⚠️ বিলিং স্ক্রিন হ্যাং!", 240, 320);
+
+          pctx.fillStyle = "#cbd5e1";
+          pctx.font = "34px 'Noto Sans Bengali', sans-serif";
+          pctx.fillText("অনুগ্রহ করে অপেক্ষা করুন... সিস্টেম ল্যাগ করেছে", 180, 410);
+
+          pctx.fillStyle = "#94a3b8";
+          pctx.font = "26px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("Out of memory buffer | Local database frozen", 230, 490);
+
+          // Glitch Lines
+          if (glitchIntensity > 0) {
+            pctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+            for (let i = 0; i < 4; i++) {
+              pctx.fillRect(0, (i * 187) % 768, 1024, 6);
+            }
+          }
+        } else {
+          // Aidly PMS POS Header
+          pctx.fillStyle = "#10b981";
+          pctx.fillRect(0, 0, 1024, 90);
+          pctx.fillStyle = "#ffffff";
+          pctx.font = "bold 40px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("✚ AIDLY PMS · SUPER POS v3.4", 40, 60);
+          pctx.fillStyle = "#d1fae5";
+          pctx.font = "bold 30px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("ONLINE ⚡ 0.2s", 760, 60);
+
+          // Search Bar
+          pctx.fillStyle = "#1e293b";
+          pctx.fillRect(60, 130, 904, 70);
+          pctx.fillStyle = "#38bdf8";
+          pctx.font = "bold 32px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("🔍 Search: Napa Extend 665mg ➔ Paracetamol", 90, 178);
+
+          // Item Card 1
+          pctx.fillStyle = "#1e293b";
+          pctx.fillRect(60, 230, 904, 130);
+          pctx.fillStyle = "#ffffff";
+          pctx.font = "bold 36px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("1. Napa Extend 665mg (Square Pharma)", 90, 280);
+          pctx.fillStyle = "#94a3b8";
+          pctx.font = "26px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("Batch #B-902 · Shelf A-3 · Exp: 2028-10", 90, 325);
+          pctx.fillStyle = "#34d399";
+          pctx.font = "bold 36px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("৳ ২৫০.০০", 790, 305);
+
+          // Item Card 2
+          pctx.fillStyle = "#1e293b";
+          pctx.fillRect(60, 380, 904, 130);
+          pctx.fillStyle = "#ffffff";
+          pctx.font = "bold 36px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("2. Ace Plus 500mg+65mg (Square Pharma)", 90, 430);
+          pctx.fillStyle = "#94a3b8";
+          pctx.font = "26px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("Batch #B-411 · Shelf A-4 · Exp: 2028-05", 90, 475);
+          pctx.fillStyle = "#34d399";
+          pctx.font = "bold 36px 'Plus Jakarta Sans', sans-serif";
+          pctx.fillText("৳ ২৯০.০০", 790, 455);
+
+          // Checkout Bottom Bar
+          pctx.fillStyle = "rgba(16, 185, 129, 0.25)";
+          pctx.fillRect(60, 540, 904, 160);
+          pctx.strokeStyle = "#10b981";
+          pctx.lineWidth = 3;
+          pctx.strokeRect(60, 540, 904, 160);
+
+          pctx.fillStyle = "#6ee7b7";
+          pctx.font = "bold 44px 'Noto Sans Bengali', sans-serif";
+          pctx.fillText("✓ ৩ সেকেন্ডে ক্যাশ মেমো রেডি • মোট: ৳ ৫৪০", 120, 640);
+        }
+        posTexture.needsUpdate = true;
+      }
+      updatePosScreen("error");
+
+      // ==========================================
+      // 3. 3D MODELS CREATION (PHARMACY WORLD)
+      // ==========================================
+
+      // A. Ground Cyber Grid
+      const gridHelper = new THREE.GridHelper(30, 30, 0x10b981, 0x1e293b);
+      gridHelper.position.y = -0.01;
+      scene.add(gridHelper);
+
+      const floorGeo = new THREE.PlaneGeometry(40, 40);
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x060912,
+        roughness: 0.6,
+        metalness: 0.2,
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // B. Modern Pharmacy Counter
+      const counterGroup = new THREE.Group();
+      scene.add(counterGroup);
+
+      const counterBaseGeo = new THREE.BoxGeometry(7, 2.0, 2.2);
+      const counterBaseMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        roughness: 0.2,
+        metalness: 0.8,
+      });
+      const counterMesh = new THREE.Mesh(counterBaseGeo, counterBaseMat);
+      counterMesh.position.set(0, 0, 0);
+      counterMesh.castShadow = true;
+      counterMesh.receiveShadow = true;
+      counterGroup.add(counterMesh);
+
+      // Glass countertop
+      const counterTopGeo = new THREE.BoxGeometry(7.3, 0.12, 2.5);
+      const counterTopMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        roughness: 0.1,
+        metalness: 0.4,
+        transparent: true,
+        opacity: 0.7,
+      });
+      const counterTop = new THREE.Mesh(counterTopGeo, counterTopMat);
+      counterTop.position.set(0, 1.05, 0);
+      counterGroup.add(counterTop);
+
+      // Glowing LED Edge Strip
+      const ledGeo = new THREE.BoxGeometry(7.1, 0.08, 0.08);
+      const ledMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+      const ledStrip = new THREE.Mesh(ledGeo, ledMat);
+      ledStrip.position.set(0, 0.98, 1.22);
+      counterGroup.add(ledStrip);
+
+      // C. 3D POS Terminal Monitor
+      const posGroup = new THREE.Group();
+      posGroup.position.set(0, 0, 0.2);
+      counterGroup.add(posGroup);
+
+      // Stand
+      const standGeo = new THREE.CylinderGeometry(0.08, 0.12, 0.5, 16);
+      const metalMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.2 });
+      const stand = new THREE.Mesh(standGeo, metalMat);
+      stand.position.set(0, 1.3, 0);
+      posGroup.add(stand);
+
+      // Monitor Body
+      const monitorGeo = new THREE.BoxGeometry(2.2, 1.45, 0.1);
+      const monitor = new THREE.Mesh(monitorGeo, metalMat);
+      monitor.position.set(0, 1.7, 0);
+      monitor.rotation.x = -0.12;
+      posGroup.add(monitor);
+
+      // Monitor Screen (With Dynamic Texture)
+      const screenGeo = new THREE.PlaneGeometry(2.05, 1.3);
+      const screenMat = new THREE.MeshBasicMaterial({ map: posTexture });
+      const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+      screenMesh.position.set(0, 1.7, 0.06);
+      screenMesh.rotation.x = -0.12;
+      posGroup.add(screenMesh);
+
+      // Thermal Receipt Printer & Spitting Paper
+      const printerGeo = new THREE.BoxGeometry(0.65, 0.45, 0.65);
+      const printer = new THREE.Mesh(printerGeo, metalMat);
+      printer.position.set(1.7, 1.28, 0.3);
+      counterGroup.add(printer);
+
+      const paperGeo = new THREE.PlaneGeometry(0.42, 1.1);
+      const paperMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 });
+      const paperMesh = new THREE.Mesh(paperGeo, paperMat);
+      paperMesh.position.set(1.7, 1.42, 0.5);
+      paperMesh.rotation.x = 0.3;
+      paperMesh.scale.set(1, 0.01, 1);
+      counterGroup.add(paperMesh);
+
+      // Handheld Barcode Scanner & Laser Beam
+      const scannerGroup = new THREE.Group();
+      scannerGroup.position.set(-1.7, 1.05, 0.3);
+      counterGroup.add(scannerGroup);
+
+      const scannerHandleGeo = new THREE.CylinderGeometry(0.05, 0.07, 0.5, 12);
+      const scannerHeadGeo = new THREE.BoxGeometry(0.32, 0.22, 0.35);
+      const scannerHandle = new THREE.Mesh(scannerHandleGeo, metalMat);
+      scannerHandle.position.set(0, 0.25, 0);
+      scannerHandle.rotation.z = 0.2;
+      const scannerHead = new THREE.Mesh(scannerHeadGeo, counterBaseMat);
+      scannerHead.position.set(0.08, 0.55, 0.08);
+      scannerGroup.add(scannerHandle, scannerHead);
+
+      // Volumetric Laser Beam
+      const laserGeo = new THREE.ConeGeometry(0.45, 1.8, 16, 1, true);
+      const laserMat = new THREE.MeshBasicMaterial({
+        color: 0x00ffcc,
+        transparent: true,
+        opacity: 0.0,
+        side: THREE.DoubleSide,
+      });
+      const laserMesh = new THREE.Mesh(laserGeo, laserMat);
+      laserMesh.position.set(0.18, 0.18, 0.55);
+      laserMesh.rotation.x = Math.PI / 2.3;
+      scannerGroup.add(laserMesh);
+
+      // D. Medicine Shelves & Racks (Backdrop)
+      const shelvesGroup = new THREE.Group();
+      shelvesGroup.position.set(0, 0, -4);
+      scene.add(shelvesGroup);
+
+      // 4 Shelf Planks
+      const plankMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5, roughness: 0.3 });
+      for (let y = 1.5; y <= 5.5; y += 1.3) {
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(9, 0.1, 1.2), plankMat);
+        plank.position.set(0, y, 0);
+        shelvesGroup.add(plank);
+
+        // Populate procedural 3D medicine boxes & bottles
+        for (let x = -3.8; x <= 3.8; x += 0.55) {
+          if (rnd() > 0.15) {
+            const isBottle = rnd() > 0.65;
+            if (isBottle) {
+              const bottleGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.45, 12);
+              const bottleMat = new THREE.MeshStandardMaterial({
+                color: 0xd97706,
+                roughness: 0.2,
+                transparent: true,
+                opacity: 0.85,
+              });
+              const bottle = new THREE.Mesh(bottleGeo, bottleMat);
+              bottle.position.set(x, y + 0.25, (rnd() - 0.5) * 0.4);
+              shelvesGroup.add(bottle);
+            } else {
+              const boxColors = [0x38bdf8, 0x10b981, 0xf59e0b, 0xa855f7, 0xef4444];
+              const boxColor = boxColors[Math.floor(rnd() * boxColors.length)];
+              const boxGeo = new THREE.BoxGeometry(0.35, 0.45, 0.3);
+              const boxMat = new THREE.MeshStandardMaterial({ color: boxColor, roughness: 0.4 });
+              const medBox = new THREE.Mesh(boxGeo, boxMat);
+              medBox.position.set(x, y + 0.25, (rnd() - 0.5) * 0.4);
+              shelvesGroup.add(medBox);
+            }
+          }
+        }
+      }
+
+      // Expired Medicine Highlight Box
+      const expiredBoxGeo = new THREE.BoxGeometry(0.65, 0.7, 0.5);
+      const expiredBoxMat = new THREE.MeshStandardMaterial({
+        color: 0xef4444,
+        roughness: 0.2,
+        emissive: 0x7f1d1d,
+        emissiveIntensity: 0.8,
+      });
+      const expiredBox = new THREE.Mesh(expiredBoxGeo, expiredBoxMat);
+      expiredBox.position.set(0.8, 2.9, 0.1);
+      shelvesGroup.add(expiredBox);
+
+      // E. Floating 3D Gold Taka Coins (Scene 2 Loss & Scene 5 Vault)
+      const coinsGroup = new THREE.Group();
+      scene.add(coinsGroup);
+
+      const coinGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.08, 24);
+      const coinMat = new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        metalness: 0.95,
+        roughness: 0.15,
+        emissive: 0xb45309,
+        emissiveIntensity: 0.2,
+      });
+
+      const coins = [];
+      for (let i = 0; i < 16; i++) {
+        const coin = new THREE.Mesh(coinGeo, coinMat);
+        coin.rotation.x = Math.PI / 2;
+        coin.position.set(0.8 + (rnd() - 0.5) * 1.5, 2.8, -3.8 + (rnd() - 0.5) * 1.2);
+        coin.visible = false;
+        coinsGroup.add(coin);
+        coins.push(coin);
+      }
+
+      // F. Hero 3D Aidly Medical Cross / Shield (Scene 3 & 6)
+      const heroShieldGroup = new THREE.Group();
+      heroShieldGroup.position.set(0, 1.1, 1.8);
+      heroShieldGroup.scale.set(0.001, 0.001, 0.001);
+      scene.add(heroShieldGroup);
+
+      // Cross Geometry (2 intersecting rounded boxes)
+      const crossMat = new THREE.MeshStandardMaterial({
+        color: 0x10b981,
+        metalness: 0.5,
+        roughness: 0.15,
+        emissive: 0x065f46,
+        emissiveIntensity: 0.6,
+      });
+      const c1 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.35), crossMat);
+      const c2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.6, 0.35), crossMat);
+      heroShieldGroup.add(c1, c2);
+
+      // Rotating Hologram Energy Ring
+      const ringGeo = new THREE.TorusGeometry(1.4, 0.035, 16, 64);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x34d399 });
+      const energyRing = new THREE.Mesh(ringGeo, ringMat);
+      heroShieldGroup.add(energyRing);
+
+      // Floating 3D Medicine Capsules
+      const capsulesGroup = new THREE.Group();
+      scene.add(capsulesGroup);
+
+      function createCapsule() {
+        const group = new THREE.Group();
+        const sphereGeo = new THREE.SphereGeometry(0.16, 16, 16);
+        const greenCapMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.2, metalness: 0.3 });
+        const whiteCapMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.2 });
+
+        const body1 = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.2, 16), greenCapMat);
+        body1.position.y = 0.1;
+        const top1 = new THREE.Mesh(sphereGeo, greenCapMat);
+        top1.position.y = 0.2;
+
+        const body2 = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.2, 16), whiteCapMat);
+        body2.position.y = -0.1;
+        const bottom2 = new THREE.Mesh(sphereGeo, whiteCapMat);
+        bottom2.position.y = -0.2;
+
+        group.add(body1, top1, body2, bottom2);
+        return group;
+      }
+
+      const cap1 = createCapsule();
+      cap1.position.set(-2.5, 4.5, 2.5);
+      cap1.rotation.set(0.5, 0.4, 0.8);
+      const cap2 = createCapsule();
+      cap2.position.set(2.8, 4.2, 2.8);
+      cap2.rotation.set(-0.6, 0.3, -0.5);
+      capsulesGroup.add(cap1, cap2);
+
+      // G. 3D Stylized Customer Queue Characters
+      const queueGroup = new THREE.Group();
+      scene.add(queueGroup);
+
+      const customerMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.4 });
+      const customers = [];
+
+      for (let i = 0; i < 5; i++) {
+        const cust = new THREE.Group();
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), customerMat);
+        head.position.y = 2.0;
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.32, 1.3, 16), customerMat);
+        body.position.y = 1.0;
+        cust.add(head, body);
+        cust.position.set(-0.8 + (rnd() - 0.5) * 0.4, 0, 2.4 + i * 1.4);
+        queueGroup.add(cust);
+        customers.push(cust);
+      }
+
+      // ==========================================
+      // 4. ANIMATION STATE & RENDER FUNCTION
+      // ==========================================
+      const state = {
+        camX: 0,
+        camY: 2.8,
+        camZ: 6.8,
+        targetX: 0,
+        targetY: 1.2,
+        targetZ: 0,
+        laserOpacity: 0,
+        receiptScaleY: 0.01,
+        shieldScale: 0.001,
+        shieldRotY: 0,
+        ringRotZ: 0,
+        coinsY: 0,
+        coinsVisible: false,
+        posVisible: true,
+        shieldVisible: false,
+        redAlarmIntensity: 3.5,
+        greenTechIntensity: 0,
+        ledColor: 0xef4444,
+      };
+
+      function renderScene() {
+        camera.position.set(state.camX, state.camY, state.camZ);
+        camera.lookAt(state.targetX, state.targetY, state.targetZ);
+
+        redAlarmLight.intensity = state.redAlarmIntensity;
+        greenTechLight.intensity = state.greenTechIntensity;
+        ledMat.color.setHex(state.ledColor);
+
+        laserMat.opacity = state.laserOpacity;
+        paperMesh.scale.y = state.receiptScaleY;
+
+        posGroup.visible = state.posVisible;
+        heroShieldGroup.visible = state.shieldVisible;
+
+        heroShieldGroup.scale.set(state.shieldScale, state.shieldScale, state.shieldScale);
+        heroShieldGroup.rotation.y = state.shieldRotY;
+        energyRing.rotation.z = state.ringRotZ;
+
+        // Animate floating capsules
+        cap1.rotation.x += 0.02;
+        cap1.rotation.y += 0.015;
+        cap2.rotation.x -= 0.018;
+        cap2.rotation.y += 0.022;
+
+        if (state.coinsVisible) {
+          coins.forEach((coin, idx) => {
+            coin.visible = true;
+            coin.position.y = 2.8 - state.coinsY * (1 + idx * 0.15);
+            coin.rotation.z += 0.05;
+          });
+        } else {
+          coins.forEach((coin) => (coin.visible = false));
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      // ==========================================
+      // 5. DETERMINISTIC GSAP TIMELINE MASTER
+      // ==========================================
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true, onUpdate: renderScene });
+
+      // Progress Bar (0.0s – 30.0s)
+      tl.to("#progress-bar", { width: "100%", duration: 30.0, ease: "none" }, 0.0);
+
+      // Subtitle Updates
+      tl.call(() => {
+        document.getElementById("subtitle").innerHTML =
+          'রাত ৮টা ১৫। কাউন্টারে ১০ জন কাস্টমার—ঠিক তখনই <span class="hl">বিলিং স্ক্রিন হ্যাং!</span>';
+      }, null, 0.0);
+      tl.call(() => {
+        document.getElementById("subtitle").innerHTML =
+          'অগোছালো ট্যাবে জেনেরিক খুঁজতেই কাস্টমার শেষ, আর <span class="hl">এক্সপায়ার্ড স্টকে লস হয় আপনার লাভ।</span>';
+      }, null, 4.6);
+      tl.call(() => {
+        document.getElementById("subtitle").innerHTML =
+          'পিক আওয়ারে আপনার ফার্মেসি আর আটকাবে না। নিয়ে আসুন <span class="hl">Aidly PMS।</span>';
+        document.getElementById("clock-pill").classList.add("ok");
+        document.getElementById("clock-text").textContent = "স্মার্ট ফার্মেসি মোড ⚡";
+        updatePosScreen("aidly");
+      }, null, 9.5);
+      tl.call(() => {
+        document.getElementById("subtitle").innerHTML =
+          'ক্লিন মাল্টি-স্ক্রিন POS-এ ওষুধ সার্চ, জেনেরিক চেক আর <span class="hl">৩ সেকেন্ডে দ্রুত ক্যাশ মেমো।</span>';
+      }, null, 13.5);
+      tl.call(() => {
+        document.getElementById("subtitle").innerHTML =
+          'অটো ব্যাচ অ্যালার্ট আগেভাগেই জানাবে এক্সপায়ারি—<span class="hl">একটি টাকাও আর লস হবে না।</span>';
+      }, null, 18.5);
+      tl.call(() => {
+        document.getElementById("subtitle").innerHTML =
+          'লাইন এগোবে দ্রুত, হিসাব থাকবে ক্লিয়ার। <span class="hl">ফ্রি ডেমোর জন্য কমেন্ট করুন “AIDLY”!</span>';
+      }, null, 22.8);
+
+      // ----------------------------------------------------
+      // SCENE 1: 0.0s – 4.6s (The Hook: Panic Freeze)
+      // ----------------------------------------------------
+      tl.call(() => {
+        state.posVisible = true;
+        state.shieldVisible = false;
+      }, null, 0.0);
+      tl.fromTo("#hud-s1", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 0.0);
+      tl.to(
+        state,
+        { camX: 0.3, camY: 2.5, camZ: 4.6, targetX: 0, targetY: 1.25, targetZ: 0.2, duration: 4.2, ease: "power1.inOut" },
+        0.0
+      );
+      // Screen jitter error pulse
+      tl.to(
+        state,
+        {
+          redAlarmIntensity: 5.5,
+          duration: 0.3,
+          repeat: 7,
+          yoyo: true,
+          ease: "sine.inOut",
+          onUpdate: () => updatePosScreen("error", 1),
+        },
+        0.8
+      );
+      tl.to("#hud-s1", { opacity: 0, scale: 0.96, duration: 0.35, ease: "power2.in" }, 4.2);
+
+      // ----------------------------------------------------
+      // SCENE 2: 4.6s – 9.5s (The Silent Cost: Expired Medicine)
+      // ----------------------------------------------------
+      tl.fromTo("#hud-s2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 4.6);
+      // Orbit camera up to medicine shelves
+      tl.to(
+        state,
+        { camX: -2.8, camY: 4.4, camZ: 1.2, targetX: 0.8, targetY: 3.2, targetZ: -3.8, duration: 4.6, ease: "power2.inOut" },
+        4.6
+      );
+      // Pulse expired box and drop coins
+      tl.call(() => {
+        state.coinsVisible = true;
+      }, null, 5.2);
+      tl.to(state, { coinsY: 3.5, duration: 3.8, ease: "power1.in" }, 5.2);
+      tl.to("#hud-s2", { opacity: 0, duration: 0.35, ease: "power2.in" }, 9.1);
+
+      // ----------------------------------------------------
+      // SCENE 3: 9.5s – 13.5s (The Turn: Aidly Shield Reveal)
+      // ----------------------------------------------------
+      tl.call(() => {
+        state.coinsVisible = false;
+        state.posVisible = false;
+        state.shieldVisible = true;
+        state.ledColor = 0x10b981;
+      }, null, 9.5);
+      tl.fromTo("#hud-s3", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.5)" }, 9.5);
+      // Lighting flips from red alert to cyber emerald
+      tl.to(state, { redAlarmIntensity: 0.5, greenTechIntensity: 4.5, duration: 0.6, ease: "power2.out" }, 9.5);
+      // Camera centers on hero 3D shield
+      tl.to(
+        state,
+        { camX: 0, camY: 2.1, camZ: 5.6, targetX: 0, targetY: 1.1, targetZ: 1.8, duration: 3.8, ease: "power2.out" },
+        9.5
+      );
+      // Shield pop & 360 spin
+      tl.to(
+        state,
+        { shieldScale: 0.65, shieldRotY: Math.PI * 2, ringRotZ: Math.PI * 3, duration: 3.6, ease: "power2.out" },
+        9.5
+      );
+      tl.to("#hud-s3", { opacity: 0, duration: 0.35, ease: "power2.in" }, 13.1);
+
+      // ----------------------------------------------------
+      // SCENE 4: 13.5s – 18.5s (Demo: Multi-Screen POS & 3s Billing)
+      // ----------------------------------------------------
+      tl.call(() => {
+        state.posVisible = true;
+        state.shieldVisible = false;
+      }, null, 13.5);
+      tl.fromTo("#hud-s4", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 13.5);
+      tl.to(state, { shieldScale: 0.001, duration: 0.3 }, 13.5);
+      // Dive camera down right next to POS terminal & scanner
+      tl.to(
+        state,
+        { camX: -0.5, camY: 2.3, camZ: 3.2, targetX: 0, targetY: 1.3, targetZ: 0.2, duration: 4.6, ease: "power2.inOut" },
+        13.5
+      );
+      // Barcode laser beam shoots down
+      tl.to(state, { laserOpacity: 0.9, duration: 0.2, repeat: 5, yoyo: true, ease: "steps(2)" }, 14.2);
+      // Thermal Receipt unrolls downwards
+      tl.to(state, { receiptScaleY: 1.0, duration: 1.2, ease: "power2.out" }, 15.2);
+      tl.to("#hud-s4", { opacity: 0, duration: 0.35, ease: "power2.in" }, 18.1);
+
+      // ----------------------------------------------------
+      // SCENE 5: 18.5s – 22.8s (Demo: Auto Expiry & FEFO Protection)
+      // ----------------------------------------------------
+      tl.call(() => {
+        state.posVisible = false;
+        state.shieldVisible = false;
+      }, null, 18.5);
+      tl.fromTo("#hud-s5", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 18.5);
+      // Camera pulls back to high-angle shelf view
+      tl.to(
+        state,
+        { camX: 2.0, camY: 4.2, camZ: 2.8, targetX: 0, targetY: 2.8, targetZ: -2, duration: 4.0, ease: "power2.inOut" },
+        18.5
+      );
+      tl.to("#hud-s5", { opacity: 0, duration: 0.35, ease: "power2.in" }, 22.4);
+
+      // ----------------------------------------------------
+      // SCENE 6: 22.8s – 30.0s (Hero Finale & Call To Action)
+      // ----------------------------------------------------
+      tl.call(() => {
+        state.posVisible = false;
+        state.shieldVisible = true;
+      }, null, 22.8);
+      tl.fromTo("#hud-s6", { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 22.8);
+      // Grand isometric camera pull-back
+      tl.to(
+        state,
+        { camX: 0, camY: 3.8, camZ: 8.5, targetX: 0, targetY: 1.1, targetZ: 0, duration: 6.8, ease: "power1.out" },
+        22.8
+      );
+      // Hero shield scales back in at center
+      tl.to(
+        state,
+        { shieldScale: 0.55, shieldRotY: Math.PI * 4, duration: 6.8, ease: "power1.out" },
+        22.8
+      );
+      // Pulsing CTA button
+      tl.fromTo("#cta-button", { scale: 0.96 }, { scale: 1.05, repeat: 5, yoyo: true, duration: 0.7, ease: "sine.inOut" }, 23.3);
+
+      // Register timeline for HyperFrames
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+      renderScene();
+    </script>
+  </body>
+</html>
